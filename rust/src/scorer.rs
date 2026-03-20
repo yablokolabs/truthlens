@@ -91,7 +91,10 @@ pub fn score_passage(claims: &[Claim]) -> TrustScore {
     let n = claim_scores.len() as f64;
 
     let avg_score = claim_scores.iter().map(|s| s.score).sum::<f64>() / n;
-    let min_score = claim_scores.iter().map(|s| s.score).fold(f64::INFINITY, f64::min);
+    let min_score = claim_scores
+        .iter()
+        .map(|s| s.score)
+        .fold(f64::INFINITY, f64::min);
 
     // Passage score is weighted: 70% average + 30% worst claim
     // This penalizes passages with even one highly suspicious claim
@@ -99,15 +102,30 @@ pub fn score_passage(claims: &[Claim]) -> TrustScore {
     let passage_score = passage_score.clamp(0.0, 1.0);
 
     let avg_signals = ScoreSignals {
-        confidence: claim_scores.iter().map(|s| s.signals.confidence).sum::<f64>() / n,
-        specificity: claim_scores.iter().map(|s| s.signals.specificity).sum::<f64>() / n,
+        confidence: claim_scores
+            .iter()
+            .map(|s| s.signals.confidence)
+            .sum::<f64>()
+            / n,
+        specificity: claim_scores
+            .iter()
+            .map(|s| s.signals.specificity)
+            .sum::<f64>()
+            / n,
         hedging: claim_scores.iter().map(|s| s.signals.hedging).sum::<f64>() / n,
-        verifiability: claim_scores.iter().map(|s| s.signals.verifiability).sum::<f64>() / n,
+        verifiability: claim_scores
+            .iter()
+            .map(|s| s.signals.verifiability)
+            .sum::<f64>()
+            / n,
         consistency: None,
     };
 
     let risk_level = classify_risk(passage_score);
-    let n_high_risk = claim_scores.iter().filter(|s| s.risk_level == RiskLevel::High || s.risk_level == RiskLevel::Critical).count();
+    let n_high_risk = claim_scores
+        .iter()
+        .filter(|s| s.risk_level == RiskLevel::High || s.risk_level == RiskLevel::Critical)
+        .count();
 
     let explanation = format!(
         "{} claims analyzed. {} high-risk claims detected. Average trust: {:.0}%.",
@@ -235,8 +253,11 @@ mod tests {
         let claims = extract_claims("Einstein was born in 1879. The sky might be purple.");
         for claim in &claims {
             let score = score_claim(claim);
-            assert!(score.score >= 0.0 && score.score <= 1.0,
-                "Score out of bounds: {}", score.score);
+            assert!(
+                score.score >= 0.0 && score.score <= 1.0,
+                "Score out of bounds: {}",
+                score.score
+            );
         }
     }
 
@@ -258,16 +279,19 @@ mod tests {
         };
         let hedged_score = score_claim(&hedged);
         let confident_score = score_claim(&confident);
-        assert!(hedged_score.score > confident_score.score,
+        assert!(
+            hedged_score.score > confident_score.score,
             "Hedged {:.3} should score higher than overconfident {:.3}",
-            hedged_score.score, confident_score.score);
+            hedged_score.score,
+            confident_score.score
+        );
     }
 
     #[test]
     fn passage_scoring() {
         let claims = extract_claims(
             "Albert Einstein was born in 1879. He might have visited Paris. \
-             The theory of relativity was published in exactly 1905."
+             The theory of relativity was published in exactly 1905.",
         );
         let passage = score_passage(&claims);
         assert!(passage.score >= 0.0 && passage.score <= 1.0);

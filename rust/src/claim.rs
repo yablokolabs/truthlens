@@ -107,9 +107,31 @@ fn contains_verifiable_content(text: &str) -> bool {
 fn is_common_sentence_starter(word: &str) -> bool {
     matches!(
         word,
-        "The" | "This" | "That" | "These" | "Those" | "It" | "They" | "He" | "She"
-        | "We" | "However" | "Although" | "Moreover" | "Furthermore" | "Additionally"
-        | "In" | "On" | "At" | "For" | "With" | "But" | "And" | "Or" | "As" | "If"
+        "The"
+            | "This"
+            | "That"
+            | "These"
+            | "Those"
+            | "It"
+            | "They"
+            | "He"
+            | "She"
+            | "We"
+            | "However"
+            | "Although"
+            | "Moreover"
+            | "Furthermore"
+            | "Additionally"
+            | "In"
+            | "On"
+            | "At"
+            | "For"
+            | "With"
+            | "But"
+            | "And"
+            | "Or"
+            | "As"
+            | "If"
     )
 }
 
@@ -143,9 +165,22 @@ fn compute_specificity(text: &str) -> f64 {
 
     // Vague quantifiers reduce specificity
     let vague_words = [
-        "some", "many", "several", "few", "various", "numerous", "often",
-        "sometimes", "generally", "typically", "usually", "about", "approximately",
-        "roughly", "around", "nearly",
+        "some",
+        "many",
+        "several",
+        "few",
+        "various",
+        "numerous",
+        "often",
+        "sometimes",
+        "generally",
+        "typically",
+        "usually",
+        "about",
+        "approximately",
+        "roughly",
+        "around",
+        "nearly",
     ];
     let vague_count = words
         .iter()
@@ -158,7 +193,12 @@ fn compute_specificity(text: &str) -> f64 {
 
     // Definitive language adds specificity
     let definitive_words = [
-        "exactly", "precisely", "specifically", "always", "never", "every",
+        "exactly",
+        "precisely",
+        "specifically",
+        "always",
+        "never",
+        "every",
     ];
     let definitive_count = words
         .iter()
@@ -190,12 +230,31 @@ fn compute_specificity(text: &str) -> f64 {
 pub fn contains_hedging(text: &str) -> bool {
     let lower = text.to_lowercase();
     let hedge_phrases = [
-        "might be", "could be", "may be", "possibly", "perhaps", "likely",
-        "probably", "it seems", "it appears", "reportedly", "allegedly",
-        "it is believed", "it is thought", "some suggest", "arguably",
-        "it is possible", "there is evidence", "to some extent",
-        "not entirely clear", "remains uncertain", "is debated",
-        "as far as we know", "to the best of", "i think", "i believe",
+        "might be",
+        "could be",
+        "may be",
+        "possibly",
+        "perhaps",
+        "likely",
+        "probably",
+        "it seems",
+        "it appears",
+        "reportedly",
+        "allegedly",
+        "it is believed",
+        "it is thought",
+        "some suggest",
+        "arguably",
+        "it is possible",
+        "there is evidence",
+        "to some extent",
+        "not entirely clear",
+        "remains uncertain",
+        "is debated",
+        "as far as we know",
+        "to the best of",
+        "i think",
+        "i believe",
     ];
     hedge_phrases.iter().any(|h| lower.contains(h))
 }
@@ -216,15 +275,22 @@ mod tests {
     #[test]
     fn detect_hedging() {
         assert!(contains_hedging("This might be related to climate change."));
-        assert!(contains_hedging("It is believed that the universe is expanding."));
+        assert!(contains_hedging(
+            "It is believed that the universe is expanding."
+        ));
         assert!(!contains_hedging("The Earth orbits the Sun."));
     }
 
     #[test]
     fn specificity_scoring() {
-        let specific = compute_specificity("Einstein published 300 papers in 1905 at the University of Zurich.");
+        let specific = compute_specificity(
+            "Einstein published 300 papers in 1905 at the University of Zurich.",
+        );
         let vague = compute_specificity("Some researchers have found various interesting results.");
-        assert!(specific > vague, "specific={specific} should be > vague={vague}");
+        assert!(
+            specific > vague,
+            "specific={specific} should be > vague={vague}"
+        );
     }
 
     #[test]

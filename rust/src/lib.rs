@@ -67,7 +67,9 @@ pub fn analyze(text: &str) -> TrustReport {
     let passage_score = score_passage(&claims);
     let high_risk = claim_reports
         .iter()
-        .filter(|c| c.trust.risk_level == RiskLevel::High || c.trust.risk_level == RiskLevel::Critical)
+        .filter(|c| {
+            c.trust.risk_level == RiskLevel::High || c.trust.risk_level == RiskLevel::Critical
+        })
         .count();
 
     TrustReport {

@@ -60,7 +60,7 @@ fn main() {
         "Albert Einstein was born on March 14, 1879, in Ulm, Germany. \
          He developed the theory of special relativity in 1905. \
          Einstein received the Nobel Prize in Physics in 1921 for his \
-         explanation of the photoelectric effect."
+         explanation of the photoelectric effect.",
     );
 
     // Example 2: Hedged/uncertain text (should score medium-high)
@@ -69,7 +69,7 @@ fn main() {
         "Climate change might be linked to increased hurricane frequency. \
          Some researchers believe that ocean temperatures could affect \
          storm intensity. It is possible that sea levels will rise by \
-         several meters over the next century."
+         several meters over the next century.",
     );
 
     // Example 3: Overconfident hallucination-style text
@@ -78,7 +78,7 @@ fn main() {
         "The Great Wall of China is exactly 21,196.18 kilometers long. \
          It was built by precisely 3,247,862 workers over 47 years. \
          The wall can be clearly seen from the International Space Station \
-         with the naked eye at all times of day."
+         with the naked eye at all times of day.",
     );
 
     // Example 4: Mixed factual + hallucinated
@@ -87,7 +87,7 @@ fn main() {
         "Python was created by Guido van Rossum and first released in 1991. \
          It is the most popular programming language with exactly 47.3 million \
          developers worldwide. Python 4.0 was released in December 2025 with \
-         native quantum computing support built into the standard library."
+         native quantum computing support built into the standard library.",
     );
 
     // Example 5: Vague filler text
@@ -95,7 +95,7 @@ fn main() {
         "Example 5: Vague non-specific text",
         "There are various factors that contribute to the situation. \
          Some experts have noted several interesting developments in the field. \
-         Many people believe that things will generally improve over time."
+         Many people believe that things will generally improve over time.",
     );
 
     // JSON output demo
