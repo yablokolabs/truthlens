@@ -1,15 +1,31 @@
 # TruthLens 🔍
 
+[![Crates.io](https://img.shields.io/crates/v/truthlens.svg)](https://crates.io/crates/truthlens)
+[![Docs.rs](https://docs.rs/truthlens/badge.svg)](https://docs.rs/truthlens)
+
 **AI Hallucination Detector — Formally Verified Trust Scoring for LLM Outputs**
 
 Analyze AI-generated text for hallucination risk. No API keys needed. No LLM calls required. Fast, local, and formally verified.
 
+**Published package:** <https://crates.io/crates/truthlens>
+**API docs:** <https://docs.rs/truthlens>
+
 ## Quick Start
+
+### Install
+
+```bash
+cargo add truthlens
+```
+
+### Run locally from the repo
 
 ```bash
 cd rust
 cargo run --release
 ```
+
+### Use as a library
 
 ```rust
 use truthlens::analyze;

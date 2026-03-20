@@ -1,11 +1,14 @@
 [package]
 name = "truthlens"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Yabloko Labs"]
 license = "Apache-2.0"
 description = "AI hallucination detector — formally verified trust scoring for LLM outputs"
 repository = "https://github.com/yablokolabs/truthlens"
+homepage = "https://github.com/yablokolabs/truthlens"
+documentation = "https://docs.rs/truthlens"
+readme = "../README.md"
 keywords = ["hallucination", "ai", "llm", "fact-checking", "trust"]
 categories = ["text-processing", "science"]
 
