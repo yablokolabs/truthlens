@@ -84,13 +84,13 @@ fn contains_verifiable_content(text: &str) -> bool {
     let words: Vec<&str> = text.split_whitespace().collect();
     let has_proper_nouns = words.iter().skip(1).any(|w| {
         w.len() > 1
-            && w.chars().next().map_or(false, |c| c.is_uppercase())
+            && w.chars().next().is_some_and(|c| c.is_uppercase())
             && !is_common_sentence_starter(w)
     });
 
     // Contains date patterns
     let has_dates = regex::Regex::new(r"\b\d{4}\b|\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\b")
-        .map_or(false, |re| re.is_match(text));
+        .is_ok_and(|re| re.is_match(text));
 
     // Contains measurement/quantity words
     let has_quantities = text.contains('%')
@@ -154,7 +154,7 @@ fn compute_specificity(text: &str) -> f64 {
         .skip(1)
         .filter(|w| {
             w.len() > 1
-                && w.chars().next().map_or(false, |c| c.is_uppercase())
+                && w.chars().next().is_some_and(|c| c.is_uppercase())
                 && !is_common_sentence_starter(w)
         })
         .count();
