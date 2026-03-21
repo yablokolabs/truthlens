@@ -64,10 +64,44 @@ println!("Damping: ζ≈{:.2}", report.trajectory.damping_estimate);
 let json = serde_json::to_string_pretty(&report).unwrap();
 ```
 
+### Multi-response consistency check (v0.3)
+
+Paste N responses to the same prompt — TruthLens detects contradictions between them.
+
+```rust
+use truthlens::check_consistency;
+
+let report = check_consistency(&[
+    "Einstein was born in 1879 in Ulm, Germany.",
+    "Einstein was born in 1879 in Munich, Germany.",  // ← contradiction
+    "Einstein was born in 1879 in Ulm, Germany.",
+]);
+
+println!("Consistency: {:.0}%", report.consistency_score * 100.0);
+// Consistency: 75%
+
+// Contradictions detected
+for c in &report.contradictions {
+    println!("⚠️  {} vs {} — {}", c.claim_a, c.claim_b, c.conflict);
+}
+// ⚠️  "Ulm, Germany" vs "Munich, Germany"
+
+// Claims unique to one response (potential hallucination)
+for u in &report.unique_claims {
+    println!("🔍 Unique to response {}: {}", u.response_idx, u.text);
+}
+```
+
+```bash
+# CLI: compare multiple responses (pipe JSON array)
+echo '["Einstein was born in 1879 in Ulm.", "Einstein was born in 1880 in Munich."]' \
+  | truthlens --consistency
+```
+
 ```toml
 # Cargo.toml
 [dependencies]
-truthlens = "0.2"
+truthlens = "0.3"
 ```
 
 ## What It Does
@@ -226,7 +260,7 @@ lake build        # compile all proofs
 
 - [x] **v0.1** — Linguistic analysis: claim extraction, hedging detection, specificity scoring
 - [x] **v0.2** — Confidence trajectory: detects oscillating, flat, or convergent confidence patterns using second-order dynamical system modeling
-- [ ] **v0.3** — Multi-response consistency: paste N responses to the same prompt, detect contradictions via semantic divergence analysis
+- [x] **v0.3** — Multi-response consistency: paste N responses to the same prompt, detect contradictions via semantic divergence analysis
 - [ ] **v0.4** — Entity cross-reference: verify extracted entities, dates, and numbers against knowledge bases (optional network, offline cache)
 - [ ] **v0.5** — Python bindings (PyO3) → `pip install truthlens`
 - [ ] **v0.6** — Browser extension (Chrome/Firefox) — highlight suspicious claims inline
