@@ -302,8 +302,11 @@ lake build        # compile all proofs
 - [x] **v0.3** — Multi-response consistency: paste N responses to the same prompt, detect contradictions via semantic divergence analysis
 - [ ] **v0.4** — Entity cross-reference: verify extracted entities, dates, and numbers against knowledge bases (optional network, offline cache)
 - [ ] **v0.5** — Python bindings (PyO3) → `pip install truthlens`
-- [ ] **v0.6** — Browser extension (Chrome/Firefox) — highlight suspicious claims inline
-- [ ] **v1.0** — API server + dashboard + enterprise features
+- [ ] **v0.6** — VS Code extension: analyze selection/file, inline diagnostics, hover explanations, status bar trust score
+- [ ] **v0.7** — Claude Code / MCP integration: local stdio MCP server, `analyze_text` + `analyze_file` tools, optional `.claude/skills/truthlens` for auto-invocation
+- [ ] **v0.8** — CI/CD integration: GitHub Action, fail builds on low trust score, policy thresholds (`--min-score`)
+- [ ] **v0.9** — Browser extension: highlight claims in ChatGPT/Claude UI with inline trust indicators
+- [ ] **v1.0** — TruthLens Platform: unified trust layer across CLI, VS Code, MCP, and CI pipelines with policy enforcement, trust thresholds, and fully local execution
 
 ### Design Principles (all versions)
 - **Zero API calls by default** — every version works offline, locally, for free
