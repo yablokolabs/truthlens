@@ -187,6 +187,20 @@ Passage score = 70% average + 30% worst claim. One bad claim drags down the whol
 - `score_order_independent` — claim order doesn't affect passage score
 - `score_deterministic` — same inputs → same output (functional purity)
 
+### Trajectory (v0.2)
+- `adjusted_score_bounded` — score + modifier stays bounded after clamp
+- `transitions_bounded` — direction changes ≤ n_claims − 2
+- `damping_positive` — damping estimate is always positive (stable system)
+- `penalty_still_nonneg` — score after penalty ≥ 0 after clamp
+
+### Consistency (v0.3)
+- `consistency_bounded` — consistency score ∈ [0, 100] after clamp
+- `contradictions_bounded` — contradiction count ≤ comparison pairs
+- `agreement_ratio_valid` — agreement ≤ total responses
+- `agreeing_response_improves` — adding agreement increases count
+- `contradiction_symmetric` — if A contradicts B, B contradicts A
+- `unique_bounded` — unique claims ≤ total claims
+
 ## Examples
 
 ### Factual text
