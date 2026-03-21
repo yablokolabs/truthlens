@@ -245,16 +245,19 @@ Passage score = 70% average + 30% worst claim. One bad claim drags down the whol
 truthlens/
 ├── rust/                       # Core library + CLI
 │   ├── src/
-│   │   ├── lib.rs              # Public API: analyze()
+│   │   ├── lib.rs              # Public API: analyze(), check_consistency()
 │   │   ├── claim.rs            # Claim extraction + linguistic analysis
 │   │   ├── scorer.rs           # Trust scoring + signal aggregation
-│   │   └── main.rs             # CLI demo
+│   │   ├── trajectory.rs       # Confidence trajectory analysis (v0.2)
+│   │   ├── consistency.rs      # Multi-response consistency checker (v0.3)
+│   │   └── main.rs             # CLI: analyze, --consistency, --demo
 │   └── Cargo.toml
 ├── lean/                       # Formal proofs
 │   ├── TruthLens/
 │   │   ├── ScoreBounds.lean    # Score ∈ [0, 1], weight sum, clamp
 │   │   ├── Monotonicity.lean   # Better signals → better score
-│   │   └── Composition.lean    # Passage aggregation properties
+│   │   ├── Composition.lean    # Passage aggregation properties
+│   │   └── Trajectory.lean     # Trajectory modifier bounds + correctness
 │   └── lakefile.lean
 ├── bridge/                     # Lean ↔ Rust mapping (coming)
 └── README.md
@@ -265,7 +268,7 @@ truthlens/
 ```bash
 # Rust
 cd rust
-cargo test       # 10 tests (9 unit + 1 doc)
+cargo test       # 22 tests (21 unit + 1 doc)
 cargo run         # demo with examples
 
 # Lean
