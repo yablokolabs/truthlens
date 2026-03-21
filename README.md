@@ -306,7 +306,8 @@ lake build        # compile all proofs
 - [ ] **v0.7** — Claude Code / MCP integration: local stdio MCP server, `analyze_text` + `analyze_file` tools, optional `.claude/skills/truthlens` for auto-invocation
 - [ ] **v0.8** — CI/CD integration: GitHub Action, fail builds on low trust score, policy thresholds (`--min-score`)
 - [ ] **v0.9** — Browser extension: highlight claims in ChatGPT/Claude UI with inline trust indicators
-- [ ] **v1.0** — TruthLens Platform: unified trust layer across CLI, VS Code, MCP, and CI pipelines with policy enforcement, trust thresholds, and fully local execution
+- [ ] **v1.0** — TruthLens Platform: unified trust layer across CLI, VS Code, MCP, and CI pipelines with policy enforcement and fully local execution
+- [ ] **v2.0** — Enterprise Trust System: policy engine, dashboard, audit & compliance reporting, enterprise API, team governance
 
 ### Design Principles (all versions)
 - **Zero API calls by default** — every version works offline, locally, for free
