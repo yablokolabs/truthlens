@@ -12,20 +12,37 @@ Analyze AI-generated text for hallucination risk. No API keys needed. No LLM cal
 
 ## Quick Start
 
-### Install
+### Install as CLI
 
 ```bash
-cargo add truthlens
+cargo install truthlens
 ```
 
-### Run locally from the repo
+### Usage
 
 ```bash
-cd rust
-cargo run --release
+# Analyze text directly
+truthlens "Einstein invented the telephone in 1876."
+#  Trust: 49% [██████████████░░░░░░░░░░░░░░░░] HIGH
+#  🔴 Claim 1: 49% — specific verifiable claim — verify independently
+
+# JSON output (for scripts/API integration)
+truthlens --json "Python 4.0 has quantum computing support."
+
+# Pipe from file or other commands
+cat ai_response.txt | truthlens
+
+# Pipe from clipboard (macOS)
+pbpaste | truthlens
+
+# Analyze ChatGPT/Claude output saved to file
+curl -s "https://api.example.com/chat" | truthlens --json
+
+# Run built-in demo examples
+truthlens --demo
 ```
 
-### Use as a library
+### Use as a Rust library
 
 ```rust
 use truthlens::analyze;
@@ -33,6 +50,24 @@ use truthlens::analyze;
 let report = analyze("Einstein was born in 1879 in Ulm, Germany.");
 println!("Trust: {:.0}% — {}", report.score * 100.0, report.risk_level);
 // Trust: 52% — HIGH
+
+// Access per-claim breakdown
+for claim in &report.claims {
+    println!("  {} — {}", claim.text, claim.trust.risk_level);
+}
+
+// Access trajectory analysis
+println!("Pattern: {}", report.trajectory.pattern);
+println!("Damping: ζ≈{:.2}", report.trajectory.damping_estimate);
+
+// JSON serialization
+let json = serde_json::to_string_pretty(&report).unwrap();
+```
+
+```toml
+# Cargo.toml
+[dependencies]
+truthlens = "0.2"
 ```
 
 ## What It Does
