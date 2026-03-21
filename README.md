@@ -209,7 +209,15 @@ Passage score = 70% average + 30% worst claim. One bad claim drags down the whol
 → 🔴 52% HIGH — specific verifiable claim, verify independently
 ```
 
-### Well-hedged text
+### Well-hedged passage (✅ LOW risk)
+```
+"Climate change might be linked to increased hurricane frequency.
+ Some researchers believe ocean temperatures could affect storm intensity.
+ It is possible that sea levels will rise over the next century."
+→ ✅ 60% LOW — Trajectory: FLAT LOW (consistently cautious), trust bonus +10%
+```
+
+### Single hedged claim
 ```
 "Climate change might be linked to increased hurricane frequency."
 → ⚠️ 65% MEDIUM — appropriately hedged
