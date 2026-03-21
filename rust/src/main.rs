@@ -1,5 +1,5 @@
 use std::io::Read;
-use truthlens::analyze;
+use truthlens::{analyze, check_consistency};
 
 fn print_report(text: &str, json_mode: bool) {
     let report = analyze(text);
@@ -50,20 +50,76 @@ fn print_report(text: &str, json_mode: bool) {
     println!();
 }
 
+fn print_consistency(responses: &[&str], json_mode: bool) {
+    let report = check_consistency(responses);
+
+    if json_mode {
+        println!("{}", serde_json::to_string_pretty(&report).unwrap());
+        return;
+    }
+
+    let bar_len = (report.consistency_score * 30.0) as usize;
+    let bar = "█".repeat(bar_len) + &"░".repeat(30 - bar_len);
+    println!(
+        "\n  Consistency: {:.0}% [{bar}]",
+        report.consistency_score * 100.0
+    );
+    println!(
+        "  {} responses, {} total claims\n",
+        report.n_responses, report.total_claims
+    );
+
+    if !report.contradictions.is_empty() {
+        println!("  ❌ Contradictions:");
+        for c in &report.contradictions {
+            println!(
+                "     Response {} vs {}: {}",
+                c.response_a + 1,
+                c.response_b + 1,
+                c.conflict
+            );
+        }
+        println!();
+    }
+
+    if !report.consistent_claims.is_empty() {
+        println!("  ✅ Consistent claims:");
+        for c in &report.consistent_claims {
+            println!(
+                "     {}/{} agree: {}",
+                c.agreement_count, report.n_responses, c.text
+            );
+        }
+        println!();
+    }
+
+    if !report.unique_claims.is_empty() {
+        println!("  🔍 Unique to one response (verify these):");
+        for u in &report.unique_claims {
+            println!("     Response {}: {}", u.response_idx + 1, u.text);
+        }
+        println!();
+    }
+}
+
 fn print_usage() {
     eprintln!("TruthLens 🔍 — AI Hallucination Detector\n");
     eprintln!("Usage:");
-    eprintln!("  truthlens \"text to analyze\"           Analyze text for hallucination risk");
-    eprintln!("  truthlens --json \"text to analyze\"     Output as JSON");
-    eprintln!("  echo \"text\" | truthlens                Read from stdin");
-    eprintln!("  echo \"text\" | truthlens --json         Read from stdin, output JSON");
-    eprintln!("  truthlens --demo                       Run demo examples");
-    eprintln!("  truthlens --help                       Show this help");
+    eprintln!("  truthlens \"text to analyze\"                    Analyze text");
+    eprintln!("  truthlens --json \"text\"                        JSON output");
+    eprintln!("  echo \"text\" | truthlens                        Read from stdin");
+    eprintln!();
+    eprintln!("  truthlens --consistency \"resp1\" \"resp2\" ...     Compare multiple responses");
+    eprintln!("  truthlens --consistency --json \"r1\" \"r2\"       Consistency check as JSON");
+    eprintln!();
+    eprintln!("  truthlens --demo                               Run demo examples");
+    eprintln!("  truthlens --help                               Show this help");
     eprintln!();
     eprintln!("Examples:");
-    eprintln!("  truthlens \"Einstein was born in 1879 in Ulm, Germany.\"");
-    eprintln!("  truthlens --json \"Python 4.0 was released with quantum support.\"");
-    eprintln!("  cat ai_response.txt | truthlens");
+    eprintln!("  truthlens \"Einstein was born in 1879 in Ulm.\"");
+    eprintln!("  truthlens --consistency \\");
+    eprintln!("    \"Einstein was born in 1879 in Ulm.\" \\");
+    eprintln!("    \"Einstein was born in 1879 in Munich.\"");
 }
 
 fn run_demo() {
@@ -90,30 +146,33 @@ fn run_demo() {
              It was built by precisely 3,247,862 workers over 47 years. \
              The wall can be clearly seen from the International Space Station.",
         ),
-        (
-            "Mixed factual + hallucinated",
-            "Python was created by Guido van Rossum and first released in 1991. \
-             Python 4.0 was released in December 2025 with native quantum computing support.",
-        ),
     ];
 
     for (title, text) in examples {
         println!("\n─── {title} ───");
         print_report(text, false);
     }
+
+    // Consistency demo
+    println!("\n─── Consistency check ───");
+    print_consistency(
+        &[
+            "Einstein was born in 1879 in Ulm, Germany. He had 3 children.",
+            "Einstein was born in 1879 in Munich, Germany. He had 3 children.",
+            "Einstein was born in 1879 in Ulm, Germany. He had 5 children.",
+        ],
+        false,
+    );
 }
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() < 2 {
-        // Check if stdin has data (piped input)
         if atty::is(atty::Stream::Stdin) {
             print_usage();
             std::process::exit(1);
         }
-
-        // Read from stdin
         let mut input = String::new();
         std::io::stdin().read_to_string(&mut input).unwrap();
         if input.trim().is_empty() {
@@ -125,11 +184,13 @@ fn main() {
     }
 
     let mut json_mode = false;
-    let mut text_args: Vec<&str> = Vec::new();
+    let mut consistency_mode = false;
+    let mut text_args: Vec<String> = Vec::new();
 
     for arg in args.iter().skip(1) {
         match arg.as_str() {
             "--json" | "-j" => json_mode = true,
+            "--consistency" | "-c" => consistency_mode = true,
             "--help" | "-h" => {
                 print_usage();
                 return;
@@ -138,17 +199,30 @@ fn main() {
                 run_demo();
                 return;
             }
-            _ => text_args.push(arg),
+            _ => text_args.push(arg.clone()),
         }
     }
 
     if text_args.is_empty() {
-        // JSON mode but no text — read from stdin
         if !atty::is(atty::Stream::Stdin) {
             let mut input = String::new();
             std::io::stdin().read_to_string(&mut input).unwrap();
-            if !input.trim().is_empty() {
-                print_report(input.trim(), json_mode);
+            let trimmed = input.trim();
+            if !trimmed.is_empty() {
+                if consistency_mode {
+                    // Try parsing as JSON array
+                    if let Ok(responses) = serde_json::from_str::<Vec<String>>(trimmed) {
+                        let refs: Vec<&str> = responses.iter().map(|s| s.as_str()).collect();
+                        print_consistency(&refs, json_mode);
+                    } else {
+                        eprintln!(
+                            "Error: --consistency with stdin expects a JSON array of strings"
+                        );
+                        std::process::exit(1);
+                    }
+                } else {
+                    print_report(trimmed, json_mode);
+                }
                 return;
             }
         }
@@ -156,6 +230,11 @@ fn main() {
         std::process::exit(1);
     }
 
-    let text = text_args.join(" ");
-    print_report(&text, json_mode);
+    if consistency_mode {
+        let refs: Vec<&str> = text_args.iter().map(|s| s.as_str()).collect();
+        print_consistency(&refs, json_mode);
+    } else {
+        let text = text_args.join(" ");
+        print_report(&text, json_mode);
+    }
 }
