@@ -38,6 +38,9 @@ pbpaste | truthlens
 # Analyze ChatGPT/Claude output saved to file
 curl -s "https://api.example.com/chat" | truthlens --json
 
+# Compare multiple AI responses for contradictions
+truthlens --consistency "response 1" "response 2" "response 3"
+
 # Run built-in demo examples
 truthlens --demo
 ```
@@ -93,8 +96,22 @@ for u in &report.unique_claims {
 ```
 
 ```bash
-# CLI: compare multiple responses (pipe JSON array)
-echo '["Einstein was born in 1879 in Ulm.", "Einstein was born in 1880 in Munich."]' \
+# CLI: compare multiple responses as separate arguments
+truthlens --consistency \
+  "Einstein was born in 1879 in Ulm, Germany." \
+  "Einstein was born in 1879 in Munich, Germany." \
+  "Einstein was born in 1879 in Ulm, Germany."
+#  Consistency: 70% [█████████████████████░░░░░░░░░]
+#  ❌ Contradictions:
+#     Response 1 vs 2: "Ulm, Germany" vs "Munich, Germany"
+#  ✅ Consistent claims:
+#     3/3 agree: einstein was born in: 1879
+
+# JSON output
+truthlens --consistency --json "resp1" "resp2" "resp3"
+
+# Pipe JSON array from stdin
+echo '["Python was created in 1991.", "Python was created in 1989."]' \
   | truthlens --consistency
 ```
 
