@@ -1,3 +1,4 @@
+use colored::Colorize;
 use std::io::Read;
 use truthlens::{analyze, check_consistency};
 
@@ -11,29 +12,72 @@ fn print_report(text: &str, json_mode: bool) {
 
     // Overall score
     let bar_len = (report.score * 30.0) as usize;
-    let bar = "█".repeat(bar_len) + &"░".repeat(30 - bar_len);
+    let bar_filled = "█".repeat(bar_len);
+    let bar_empty = "░".repeat(30 - bar_len);
+
+    let score_pct = format!("{:.0}%", report.score * 100.0);
+    let risk_str = format!("{}", report.risk_level);
+
+    let (score_colored, risk_colored, bar_colored) = match report.risk_level {
+        truthlens::RiskLevel::Low => (
+            score_pct.green().bold(),
+            risk_str.green().bold(),
+            bar_filled.green(),
+        ),
+        truthlens::RiskLevel::Medium => (
+            score_pct.yellow().bold(),
+            risk_str.yellow().bold(),
+            bar_filled.yellow(),
+        ),
+        truthlens::RiskLevel::High => (
+            score_pct.red().bold(),
+            risk_str.red().bold(),
+            bar_filled.red(),
+        ),
+        truthlens::RiskLevel::Critical => (
+            score_pct.red().bold(),
+            risk_str.red().bold(),
+            bar_filled.red(),
+        ),
+    };
+
     println!(
-        "\n  Trust: {:.0}% [{bar}] {}\n",
-        report.score * 100.0,
-        report.risk_level
+        "\n  Trust: {} [{}{}] {}\n",
+        score_colored,
+        bar_colored,
+        bar_empty.dimmed(),
+        risk_colored
     );
-    println!("  {}", report.summary);
+    println!("  {}", report.summary.dimmed());
 
     // Trajectory
+    let traj_str = format!("{}", report.trajectory.pattern);
+    let traj_colored = match report.trajectory.trust_modifier {
+        m if m > 0.0 => traj_str.green(),
+        m if m < 0.0 => traj_str.red(),
+        _ => traj_str.white(),
+    };
     println!(
         "\n  📈 Trajectory: {} (ζ≈{:.2}, modifier={:+.2})\n",
-        report.trajectory.pattern,
-        report.trajectory.damping_estimate,
-        report.trajectory.trust_modifier
+        traj_colored, report.trajectory.damping_estimate, report.trajectory.trust_modifier
     );
 
     // Per-claim breakdown
     for (i, claim) in report.claims.iter().enumerate() {
-        let icon = match claim.trust.risk_level {
-            truthlens::RiskLevel::Low => "✅",
-            truthlens::RiskLevel::Medium => "⚠️ ",
-            truthlens::RiskLevel::High => "🔴",
-            truthlens::RiskLevel::Critical => "💀",
+        let (icon, claim_score) = match claim.trust.risk_level {
+            truthlens::RiskLevel::Low => {
+                ("✅", format!("{:.0}%", claim.trust.score * 100.0).green())
+            }
+            truthlens::RiskLevel::Medium => {
+                ("⚠️ ", format!("{:.0}%", claim.trust.score * 100.0).yellow())
+            }
+            truthlens::RiskLevel::High => {
+                ("🔴", format!("{:.0}%", claim.trust.score * 100.0).red())
+            }
+            truthlens::RiskLevel::Critical => (
+                "💀",
+                format!("{:.0}%", claim.trust.score * 100.0).red().bold(),
+            ),
         };
         let text = if claim.text.len() > 70 {
             format!("{}...", &claim.text[..67])
@@ -41,11 +85,12 @@ fn print_report(text: &str, json_mode: bool) {
             claim.text.clone()
         };
         println!(
-            "  {icon} Claim {}: {:.0}% — \"{text}\"",
+            "  {icon} Claim {}: {} — \"{}\"",
             i + 1,
-            claim.trust.score * 100.0,
+            claim_score,
+            text.white()
         );
-        println!("     {}", claim.trust.explanation);
+        println!("     {}", claim.trust.explanation.dimmed());
     }
     println!();
 }
@@ -58,74 +103,124 @@ fn print_consistency(responses: &[&str], json_mode: bool) {
         return;
     }
 
+    let score_pct = format!("{:.0}%", report.consistency_score * 100.0);
     let bar_len = (report.consistency_score * 30.0) as usize;
-    let bar = "█".repeat(bar_len) + &"░".repeat(30 - bar_len);
+    let bar_filled = "█".repeat(bar_len);
+    let bar_empty = "░".repeat(30 - bar_len);
+
+    let (score_colored, bar_colored) = if report.consistency_score >= 0.7 {
+        (score_pct.green().bold(), bar_filled.green())
+    } else if report.consistency_score >= 0.5 {
+        (score_pct.yellow().bold(), bar_filled.yellow())
+    } else {
+        (score_pct.red().bold(), bar_filled.red())
+    };
+
     println!(
-        "\n  Consistency: {:.0}% [{bar}]",
-        report.consistency_score * 100.0
+        "\n  Consistency: {} [{}{}]",
+        score_colored,
+        bar_colored,
+        bar_empty.dimmed()
     );
     println!(
         "  {} responses, {} total claims\n",
-        report.n_responses, report.total_claims
+        report.n_responses.to_string().bold(),
+        report.total_claims.to_string().bold()
     );
 
     if !report.contradictions.is_empty() {
-        println!("  ❌ Contradictions:");
+        println!("  {} Contradictions:", "❌".red());
         for c in &report.contradictions {
             println!(
                 "     Response {} vs {}: {}",
-                c.response_a + 1,
-                c.response_b + 1,
-                c.conflict
+                (c.response_a + 1).to_string().bold(),
+                (c.response_b + 1).to_string().bold(),
+                c.conflict.red()
             );
         }
         println!();
     }
 
     if !report.consistent_claims.is_empty() {
-        println!("  ✅ Consistent claims:");
+        println!("  {} Consistent claims:", "✅".green());
         for c in &report.consistent_claims {
             println!(
                 "     {}/{} agree: {}",
-                c.agreement_count, report.n_responses, c.text
+                c.agreement_count.to_string().green(),
+                report.n_responses,
+                c.text.white()
             );
         }
         println!();
     }
 
     if !report.unique_claims.is_empty() {
-        println!("  🔍 Unique to one response (verify these):");
+        println!("  {} Unique to one response (verify these):", "🔍".yellow());
         for u in &report.unique_claims {
-            println!("     Response {}: {}", u.response_idx + 1, u.text);
+            println!(
+                "     Response {}: {}",
+                (u.response_idx + 1).to_string().yellow(),
+                u.text.yellow()
+            );
         }
         println!();
     }
 }
 
 fn print_usage() {
-    eprintln!("TruthLens 🔍 — AI Hallucination Detector\n");
-    eprintln!("Usage:");
-    eprintln!("  truthlens \"text to analyze\"                    Analyze text");
-    eprintln!("  truthlens --json \"text\"                        JSON output");
-    eprintln!("  echo \"text\" | truthlens                        Read from stdin");
+    eprintln!("{}", "TruthLens 🔍 — AI Hallucination Detector\n".bold());
+    eprintln!("{}", "Usage:".underline());
+    eprintln!(
+        "  {} \"text to analyze\"                    Analyze text",
+        "truthlens".green()
+    );
+    eprintln!(
+        "  {} --json \"text\"                        JSON output",
+        "truthlens".green()
+    );
+    eprintln!(
+        "  echo \"text\" | {}                        Read from stdin",
+        "truthlens".green()
+    );
     eprintln!();
-    eprintln!("  truthlens --consistency \"resp1\" \"resp2\" ...     Compare multiple responses");
-    eprintln!("  truthlens --consistency --json \"r1\" \"r2\"       Consistency check as JSON");
+    eprintln!(
+        "  {} --consistency \"resp1\" \"resp2\" ...     Compare responses",
+        "truthlens".green()
+    );
+    eprintln!(
+        "  {} --consistency --json \"r1\" \"r2\"       Consistency as JSON",
+        "truthlens".green()
+    );
     eprintln!();
-    eprintln!("  truthlens --demo                               Run demo examples");
-    eprintln!("  truthlens --help                               Show this help");
+    eprintln!(
+        "  {} --demo                               Run examples",
+        "truthlens".green()
+    );
+    eprintln!(
+        "  {} --help                               Show this help",
+        "truthlens".green()
+    );
     eprintln!();
-    eprintln!("Examples:");
-    eprintln!("  truthlens \"Einstein was born in 1879 in Ulm.\"");
-    eprintln!("  truthlens --consistency \\");
-    eprintln!("    \"Einstein was born in 1879 in Ulm.\" \\");
-    eprintln!("    \"Einstein was born in 1879 in Munich.\"");
+    eprintln!("{}", "Examples:".underline());
+    eprintln!("  truthlens \"Einstein was born in 1879 in Ulm.\"",);
+    eprintln!("  truthlens --consistency \\",);
+    eprintln!("    \"Einstein was born in 1879 in Ulm.\" \\",);
+    eprintln!("    \"Einstein was born in 1879 in Munich.\"",);
 }
 
 fn run_demo() {
-    println!("╔══════════════════════════════════════════════════════════╗");
-    println!("║  TruthLens 🔍 — AI Hallucination Detector               ║");
-    println!("╚══════════════════════════════════════════════════════════╝");
+    println!(
+        "{}",
+        "╔══════════════════════════════════════════════════════════╗".bold()
+    );
+    println!(
+        "{}",
+        "║  TruthLens 🔍 — AI Hallucination Detector               ║".bold()
+    );
+    println!(
+        "{}",
+        "╚══════════════════════════════════════════════════════════╝".bold()
+    );
 
     let examples = vec![
         (
@@ -149,12 +244,11 @@ fn run_demo() {
     ];
 
     for (title, text) in examples {
-        println!("\n─── {title} ───");
+        println!("\n─── {} ───", title.bold());
         print_report(text, false);
     }
 
-    // Consistency demo
-    println!("\n─── Consistency check ───");
+    println!("\n─── {} ───", "Consistency check".bold());
     print_consistency(
         &[
             "Einstein was born in 1879 in Ulm, Germany. He had 3 children.",
@@ -176,7 +270,7 @@ fn main() {
         let mut input = String::new();
         std::io::stdin().read_to_string(&mut input).unwrap();
         if input.trim().is_empty() {
-            eprintln!("Error: empty input");
+            eprintln!("{}", "Error: empty input".red());
             std::process::exit(1);
         }
         print_report(input.trim(), false);
@@ -210,13 +304,13 @@ fn main() {
             let trimmed = input.trim();
             if !trimmed.is_empty() {
                 if consistency_mode {
-                    // Try parsing as JSON array
                     if let Ok(responses) = serde_json::from_str::<Vec<String>>(trimmed) {
                         let refs: Vec<&str> = responses.iter().map(|s| s.as_str()).collect();
                         print_consistency(&refs, json_mode);
                     } else {
                         eprintln!(
-                            "Error: --consistency with stdin expects a JSON array of strings"
+                            "{}",
+                            "Error: --consistency with stdin expects a JSON array of strings".red()
                         );
                         std::process::exit(1);
                     }

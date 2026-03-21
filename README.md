@@ -5,7 +5,7 @@
 
 **AI Hallucination Detector — Formally Verified Trust Scoring for LLM Outputs**
 
-Analyze AI-generated text for hallucination risk. No API keys needed. No LLM calls required. Fast, local, and formally verified.
+Analyze AI-generated text for hallucination risk. No API keys needed. No LLM calls required. Fast, local, formally verified, and color-coded terminal output.
 
 **Published package:** <https://crates.io/crates/truthlens>
 **API docs:** <https://docs.rs/truthlens>
@@ -281,7 +281,7 @@ lake build        # compile all proofs
 - [x] **v0.1** — Linguistic analysis: claim extraction, hedging detection, specificity scoring
 - [x] **v0.2** — Confidence trajectory: detects oscillating, flat, or convergent confidence patterns using second-order dynamical system modeling
 - [x] **v0.3** — Multi-response consistency: paste N responses to the same prompt, detect contradictions via semantic divergence analysis
-- [ ] **v0.4** — Entity cross-reference: verify extracted entities, dates, and numbers against knowledge bases (optional network, offline cache) + colored terminal output
+- [ ] **v0.4** — Entity cross-reference: verify extracted entities, dates, and numbers against knowledge bases (optional network, offline cache)
 - [ ] **v0.5** — Python bindings (PyO3) → `pip install truthlens`
 - [ ] **v0.6** — Browser extension (Chrome/Firefox) — highlight suspicious claims inline
 - [ ] **v1.0** — API server + dashboard + enterprise features
