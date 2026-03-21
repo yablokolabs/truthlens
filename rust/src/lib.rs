@@ -14,10 +14,12 @@
 //! ```
 
 pub mod claim;
+pub mod consistency;
 pub mod scorer;
 pub mod trajectory;
 
 pub use claim::{extract_claims, Claim};
+pub use consistency::{check_consistency, ConsistencyReport, Contradiction};
 pub use scorer::{score_claim, score_passage, RiskLevel, TrustScore};
 pub use trajectory::{analyze_trajectory, TrajectoryAnalysis, TrajectoryPattern};
 
