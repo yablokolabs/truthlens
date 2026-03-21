@@ -415,7 +415,7 @@ mod tests {
         ]);
         // Should detect numeric disagreement
         assert!(
-            report.contradictions.is_empty() == false || report.unique_claims.len() > 0,
+            !report.contradictions.is_empty() || !report.unique_claims.is_empty(),
             "Should detect disagreement in numbers"
         );
     }
