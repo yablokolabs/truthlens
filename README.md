@@ -257,7 +257,8 @@ truthlens/
 │   │   ├── ScoreBounds.lean    # Score ∈ [0, 1], weight sum, clamp
 │   │   ├── Monotonicity.lean   # Better signals → better score
 │   │   ├── Composition.lean    # Passage aggregation properties
-│   │   └── Trajectory.lean     # Trajectory modifier bounds + correctness
+│   │   ├── Trajectory.lean     # Trajectory modifier bounds + correctness
+│   │   └── Consistency.lean    # Contradiction bounds, agreement, symmetry
 │   └── lakefile.lean
 ├── bridge/                     # Lean ↔ Rust mapping (coming)
 └── README.md
@@ -269,6 +270,10 @@ truthlens/
 # Rust
 cd rust
 cargo test       # 22 tests (21 unit + 1 doc)
+
+# Lean
+cd lean
+lake build        # 5 proof modules, zero sorry
 cargo run         # demo with examples
 
 # Lean
