@@ -19,6 +19,13 @@ fn print_report(title: &str, text: &str) {
     println!("  {}", report.summary);
     println!();
 
+    // Trajectory analysis (v0.2)
+    println!(
+        "  📈 Trajectory: {} (ζ≈{:.2}, modifier={:+.2})",
+        report.trajectory.pattern, report.trajectory.damping_estimate, report.trajectory.trust_modifier
+    );
+    println!();
+
     // Per-claim breakdown
     for (i, claim) in report.claims.iter().enumerate() {
         let icon = match claim.trust.risk_level {

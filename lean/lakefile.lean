@@ -9,4 +9,4 @@ package «truthlens-proofs» where
 @[default_target]
 lean_lib «TruthLens» where
   srcDir := "."
-  roots := #[`TruthLens.ScoreBounds, `TruthLens.Monotonicity, `TruthLens.Composition]
+  roots := #[`TruthLens.ScoreBounds, `TruthLens.Monotonicity, `TruthLens.Composition, `TruthLens.Trajectory]

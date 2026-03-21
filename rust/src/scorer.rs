@@ -201,6 +201,11 @@ fn aggregate_score(signals: &ScoreSignals) -> f64 {
     (base + consistency_bonus).clamp(0.0, 1.0)
 }
 
+/// Classify risk level from score (public for lib.rs integration).
+pub fn classify_risk_pub(score: f64) -> RiskLevel {
+    classify_risk(score)
+}
+
 fn classify_risk(score: f64) -> RiskLevel {
     if score >= 0.75 {
         RiskLevel::Low

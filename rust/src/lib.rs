@@ -15,9 +15,11 @@
 
 pub mod claim;
 pub mod scorer;
+pub mod trajectory;
 
 pub use claim::{extract_claims, Claim};
 pub use scorer::{score_claim, score_passage, RiskLevel, TrustScore};
+pub use trajectory::{analyze_trajectory, TrajectoryAnalysis, TrajectoryPattern};
 
 use serde::{Deserialize, Serialize};
 
@@ -32,6 +34,8 @@ pub struct TrustReport {
     pub summary: String,
     /// Per-claim breakdown
     pub claims: Vec<ClaimReport>,
+    /// Confidence trajectory analysis (v0.2)
+    pub trajectory: TrajectoryAnalysis,
     /// Total number of claims analyzed
     pub total_claims: usize,
     /// Number of high-risk claims
@@ -65,6 +69,12 @@ pub fn analyze(text: &str) -> TrustReport {
         .collect();
 
     let passage_score = score_passage(&claims);
+    let traj = analyze_trajectory(&claims);
+
+    // Apply trajectory modifier to the passage score
+    let adjusted_score = (passage_score.score + traj.trust_modifier).clamp(0.0, 1.0);
+    let adjusted_risk = scorer::classify_risk_pub(adjusted_score);
+
     let high_risk = claim_reports
         .iter()
         .filter(|c| {
@@ -72,10 +82,16 @@ pub fn analyze(text: &str) -> TrustReport {
         })
         .count();
 
+    let summary = format!(
+        "{} Trajectory: {}",
+        passage_score.explanation, traj.pattern
+    );
+
     TrustReport {
-        score: passage_score.score,
-        risk_level: passage_score.risk_level,
-        summary: passage_score.explanation,
+        score: adjusted_score,
+        risk_level: adjusted_risk,
+        summary,
+        trajectory: traj,
         total_claims: claim_reports.len(),
         high_risk_claims: high_risk,
         claims: claim_reports,
