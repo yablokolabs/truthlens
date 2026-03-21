@@ -189,12 +189,20 @@ lake build        # compile all proofs
 
 ## Roadmap
 
-- [x] **v0.1** — Linguistic analysis (no LLM, fast)
-- [ ] **v0.2** — Self-consistency checker (multi-sample, needs LLM)
-- [ ] **v0.3** — Entity cross-reference (Wikidata lookup)
-- [ ] **v0.4** — Python bindings (PyO3) → `pip install truthlens`
-- [ ] **v0.5** — Browser extension (Chrome/Firefox)
-- [ ] **v1.0** — API server + dashboard
+- [x] **v0.1** — Linguistic analysis: claim extraction, hedging detection, specificity scoring (no LLM, fast)
+- [x] **v0.2** — Confidence trajectory analysis: maps confidence patterns to control theory damping model (laplace-gm inspired, still zero API calls)
+- [ ] **v0.3** — Multi-response consistency checker: paste N responses, detect contradictions (minn-sim inspired, still zero API calls)
+- [ ] **v0.4** — Entity cross-reference: check extracted entities/dates/numbers against Wikidata (optional network, offline cache)
+- [ ] **v0.5** — Python bindings (PyO3) → `pip install truthlens`
+- [ ] **v0.6** — Browser extension (Chrome/Firefox) — highlight suspicious claims inline
+- [ ] **v0.7** — CLI tool: `truthlens check "paste AI text here"` with colored terminal output
+- [ ] **v1.0** — API server + dashboard + enterprise features
+
+### Design Principles (all versions)
+- **Zero API calls by default** — every version works offline, locally, for free
+- **Formally verified** — Lean 4 proofs for all scoring properties
+- **Hedging = trustworthy** — a model that says "might" is more honest than one stating falsehoods with certainty
+- **Fast** — microsecond analysis, no model inference required
 
 ## Why TruthLens?
 
