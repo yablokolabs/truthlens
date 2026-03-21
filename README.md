@@ -299,7 +299,7 @@ lake build        # compile all proofs
 
 - [x] **v0.1** — Linguistic analysis: claim extraction, hedging detection, specificity scoring
 - [x] **v0.2** — Confidence trajectory: detects oscillating, flat, or convergent confidence patterns using second-order dynamical system modeling
-- [x] **v0.3** — Multi-response consistency + CLI: `cargo install truthlens`, `--consistency` mode, colored terminal output, JSON output, stdin pipe support
+- [x] **v0.3** — Multi-response consistency, CLI (`cargo install truthlens`), colored output
 - [ ] **v0.4** — Entity cross-reference: verify extracted entities, dates, and numbers against knowledge bases (optional network, offline cache)
 - [ ] **v0.5** — Python bindings (PyO3) → `pip install truthlens`
 - [ ] **v0.6** — VS Code extension: analyze selection/file, inline diagnostics, hover explanations, status bar trust score
