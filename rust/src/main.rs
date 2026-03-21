@@ -14,7 +14,8 @@ fn print_report(text: &str, json_mode: bool) {
     let bar = "█".repeat(bar_len) + &"░".repeat(30 - bar_len);
     println!(
         "\n  Trust: {:.0}% [{bar}] {}\n",
-        report.score * 100.0, report.risk_level
+        report.score * 100.0,
+        report.risk_level
     );
     println!("  {}", report.summary);
 

@@ -82,10 +82,7 @@ pub fn analyze(text: &str) -> TrustReport {
         })
         .count();
 
-    let summary = format!(
-        "{} Trajectory: {}",
-        passage_score.explanation, traj.pattern
-    );
+    let summary = format!("{} Trajectory: {}", passage_score.explanation, traj.pattern);
 
     TrustReport {
         score: adjusted_score,

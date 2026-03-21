@@ -16,8 +16,8 @@ use serde::{Deserialize, Serialize};
 ///
 ///   - **Flat high confidence**: uniformly confident with no hedging
 ///     → SUSPICIOUS. Real knowledge has nuance.
-
-/// Per-sentence confidence level.
+///
+/// # Per-sentence confidence level
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ConfidenceLevel {
     /// Strong definitive language, no hedging
@@ -50,10 +50,18 @@ pub enum TrajectoryPattern {
 impl std::fmt::Display for TrajectoryPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TrajectoryPattern::Oscillating => write!(f, "OSCILLATING (underdamped — hallucination risk)"),
-            TrajectoryPattern::FlatHigh => write!(f, "FLAT HIGH (uniformly overconfident — suspicious)"),
-            TrajectoryPattern::FlatLow => write!(f, "FLAT LOW (consistently cautious — trustworthy)"),
-            TrajectoryPattern::Convergent => write!(f, "CONVERGENT (builds confidence — good pattern)"),
+            TrajectoryPattern::Oscillating => {
+                write!(f, "OSCILLATING (underdamped — hallucination risk)")
+            }
+            TrajectoryPattern::FlatHigh => {
+                write!(f, "FLAT HIGH (uniformly overconfident — suspicious)")
+            }
+            TrajectoryPattern::FlatLow => {
+                write!(f, "FLAT LOW (consistently cautious — trustworthy)")
+            }
+            TrajectoryPattern::Convergent => {
+                write!(f, "CONVERGENT (builds confidence — good pattern)")
+            }
             TrajectoryPattern::Divergent => write!(f, "DIVERGENT (losing confidence — uncertain)"),
             TrajectoryPattern::Mixed => write!(f, "MIXED (no clear pattern)"),
             TrajectoryPattern::Insufficient => write!(f, "INSUFFICIENT (too few claims)"),
@@ -90,11 +98,14 @@ pub fn analyze_trajectory(claims: &[Claim]) -> TrajectoryAnalysis {
 
     // Compute per-claim confidence levels
     let levels: Vec<ConfidenceLevel> = claims.iter().map(classify_confidence).collect();
-    let scores: Vec<f64> = levels.iter().map(|l| match l {
-        ConfidenceLevel::High => 1.0,
-        ConfidenceLevel::Medium => 0.5,
-        ConfidenceLevel::Low => 0.0,
-    }).collect();
+    let scores: Vec<f64> = levels
+        .iter()
+        .map(|l| match l {
+            ConfidenceLevel::High => 1.0,
+            ConfidenceLevel::Medium => 0.5,
+            ConfidenceLevel::Low => 0.0,
+        })
+        .collect();
 
     // Count transitions (direction changes in confidence)
     let transitions = count_transitions(&scores);
@@ -104,29 +115,33 @@ pub fn analyze_trajectory(claims: &[Claim]) -> TrajectoryAnalysis {
 
     // Classify the pattern
     let avg_confidence = scores.iter().sum::<f64>() / scores.len() as f64;
-    let variance = scores.iter().map(|s| (s - avg_confidence).powi(2)).sum::<f64>() / scores.len() as f64;
+    let variance = scores
+        .iter()
+        .map(|s| (s - avg_confidence).powi(2))
+        .sum::<f64>()
+        / scores.len() as f64;
 
     let pattern = classify_pattern(transitions, trend, avg_confidence, variance, scores.len());
 
     // Map to damping estimate
     let damping_estimate = match &pattern {
         TrajectoryPattern::Oscillating => 0.2 + 0.3 * (1.0 / (transitions as f64 + 1.0)),
-        TrajectoryPattern::FlatHigh => 0.1,  // Looks stable but suspiciously so
-        TrajectoryPattern::FlatLow => 1.5,   // Overdamped — cautious
+        TrajectoryPattern::FlatHigh => 0.1, // Looks stable but suspiciously so
+        TrajectoryPattern::FlatLow => 1.5,  // Overdamped — cautious
         TrajectoryPattern::Convergent => 0.9, // Nearly critical — good
-        TrajectoryPattern::Divergent => 0.6,  // Moderately underdamped
+        TrajectoryPattern::Divergent => 0.6, // Moderately underdamped
         TrajectoryPattern::Mixed => 0.7,
         TrajectoryPattern::Insufficient => 1.0,
     };
 
     // Trust modifier: how much the trajectory adjusts the base score
     let trust_modifier = match &pattern {
-        TrajectoryPattern::FlatLow => 0.10,       // Consistent caution → bonus
-        TrajectoryPattern::Convergent => 0.08,     // Good pattern → bonus
-        TrajectoryPattern::Mixed => 0.0,           // Neutral
-        TrajectoryPattern::Divergent => -0.05,     // Losing confidence → slight penalty
-        TrajectoryPattern::Oscillating => -0.10,   // Oscillation → penalty
-        TrajectoryPattern::FlatHigh => -0.12,      // Uniform overconfidence → penalty
+        TrajectoryPattern::FlatLow => 0.10, // Consistent caution → bonus
+        TrajectoryPattern::Convergent => 0.08, // Good pattern → bonus
+        TrajectoryPattern::Mixed => 0.0,    // Neutral
+        TrajectoryPattern::Divergent => -0.05, // Losing confidence → slight penalty
+        TrajectoryPattern::Oscillating => -0.10, // Oscillation → penalty
+        TrajectoryPattern::FlatHigh => -0.12, // Uniform overconfidence → penalty
         TrajectoryPattern::Insufficient => 0.0,
     };
 
@@ -197,7 +212,11 @@ fn compute_trend(scores: &[f64]) -> f64 {
         den += x * x;
     }
 
-    if den.abs() < 1e-10 { 0.0 } else { num / den }
+    if den.abs() < 1e-10 {
+        0.0
+    } else {
+        num / den
+    }
 }
 
 fn classify_pattern(
@@ -256,10 +275,10 @@ mod tests {
     #[test]
     fn oscillating_pattern() {
         let claims = vec![
-            make_claim("Einstein was born in 1879.", 0.7, true, false),  // High
+            make_claim("Einstein was born in 1879.", 0.7, true, false), // High
             make_claim("Something might be related.", 0.2, false, true), // Low
             make_claim("He published exactly 300 papers.", 0.8, true, false), // High
-            make_claim("Perhaps this is unclear.", 0.1, false, true),    // Low
+            make_claim("Perhaps this is unclear.", 0.1, false, true),   // Low
             make_claim("The answer is precisely 42.", 0.9, true, false), // High
         ];
         let analysis = analyze_trajectory(&claims);
