@@ -16,11 +16,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install maturin and test deps
-        run: pip install maturin pytest
+      - name: Create venv and install deps
+        working-directory: python
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install maturin pytest
       - name: Build and install
         working-directory: python
-        run: maturin develop --features pyo3/extension-module
+        run: |
+          source .venv/bin/activate
+          maturin develop --features pyo3/extension-module
       - name: Run tests
         working-directory: python
-        run: pytest tests/ -v
+        run: |
+          source .venv/bin/activate
+          pytest tests/ -v
