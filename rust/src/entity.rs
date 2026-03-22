@@ -553,7 +553,7 @@ mod tests {
             })
             .collect();
         let modifier = compute_verification_modifier(&results);
-        assert!(modifier >= -0.15 && modifier <= 0.15);
+        assert!((-0.15..=0.15).contains(&modifier));
     }
 
     #[test]
