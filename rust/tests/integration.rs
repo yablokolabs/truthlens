@@ -20,7 +20,11 @@ fn analyze_hedged_text() {
          Some researchers believe that ocean temperatures could affect storm intensity.",
     );
     // Hedged text should score higher (less risky)
-    assert!(report.score > 0.4, "Hedged text should score reasonably: {}", report.score);
+    assert!(
+        report.score > 0.4,
+        "Hedged text should score reasonably: {}",
+        report.score
+    );
 }
 
 #[test]
@@ -31,7 +35,10 @@ fn analyze_overconfident_text() {
          The wall can be clearly seen from the International Space Station.",
     );
     // Overconfident text with suspicious precision
-    assert!(report.high_risk_claims > 0, "Should flag some high-risk claims");
+    assert!(
+        report.high_risk_claims > 0,
+        "Should flag some high-risk claims"
+    );
 }
 
 #[test]
@@ -59,7 +66,10 @@ fn analyze_with_verification_returns_results() {
     assert!(report.score > 0.0 && report.score <= 1.0);
     // Should have verification results on claims
     let has_verification = report.claims.iter().any(|c| c.verification.is_some());
-    assert!(has_verification, "analyze_with_verification should populate verification field");
+    assert!(
+        has_verification,
+        "analyze_with_verification should populate verification field"
+    );
 }
 
 #[test]
