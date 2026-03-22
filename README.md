@@ -224,6 +224,19 @@ Passage score = 70% average + 30% worst claim. One bad claim drags down the whol
 - `contradiction_symmetric` — if A contradicts B, B contradicts A
 - `unique_bounded` — unique claims ≤ total claims
 
+### Verification (v0.4)
+- `verification_modifier_bounded` — modifier ∈ [0, 15] (scaled) after clamp
+- `combined_modifier_bounded` — combined modifier ∈ [-15, +15]
+- `adjusted_score_with_verification` — score + verification modifier stays in [0, 100]
+- `adjusted_score_with_both` — score + trajectory + verification modifier stays in [0, 100]
+- `entity_partition` — verified + contradicted + unknown = total
+- `verified_contradicted_disjoint` — verified + contradicted ≤ total
+- `empty_verification_neutral` — no entities → zero modifier
+- `all_verified_max` — all verified → maximum positive modifier
+- `all_contradicted_max` — all contradicted → maximum negative modifier
+- `more_verified_improves` — adding verified entity increases modifier (monotonic)
+- `more_contradicted_worsens` — adding contradicted entity decreases modifier (monotonic)
+
 ## Examples
 
 ### Factual text
@@ -297,6 +310,8 @@ truthlens/
 │   │   ├── consistency.rs      # Multi-response consistency checker (v0.3)
 │   │   ├── entity.rs           # Entity cross-reference with Wikidata (v0.4)
 │   │   └── main.rs             # CLI: analyze, --consistency, --verify, --demo
+│   ├── tests/
+│   │   └── integration.rs      # End-to-end integration tests
 │   └── Cargo.toml
 ├── lean/                       # Formal proofs
 │   ├── TruthLens/
@@ -304,7 +319,8 @@ truthlens/
 │   │   ├── Monotonicity.lean   # Better signals → better score
 │   │   ├── Composition.lean    # Passage aggregation properties
 │   │   ├── Trajectory.lean     # Trajectory modifier bounds + correctness
-│   │   └── Consistency.lean    # Contradiction bounds, agreement, symmetry
+│   │   ├── Consistency.lean    # Contradiction bounds, agreement, symmetry
+│   │   └── Verification.lean   # Entity verification modifier bounds (v0.4)
 │   └── lakefile.lean
 ├── bridge/                     # Lean ↔ Rust mapping (coming)
 └── README.md
@@ -320,7 +336,7 @@ cargo test --features verify  # includes entity verification tests
 
 # Lean
 cd lean
-lake build        # 5 proof modules, zero sorry
+lake build        # 6 proof modules, zero sorry
 cargo run         # demo with examples
 
 # Lean
