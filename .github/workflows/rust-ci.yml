@@ -34,17 +34,23 @@ jobs:
         with:
           workspaces: rust
 
-      - name: Cargo check
+      - name: Cargo check (default)
         run: cargo check --all-targets
+
+      - name: Cargo check (verify feature)
+        run: cargo check --all-targets --features verify
 
       - name: Cargo fmt
         run: cargo fmt --all -- --check
 
-      - name: Cargo clippy
-        run: cargo clippy --all-targets -- -D warnings
+      - name: Cargo clippy (all features)
+        run: cargo clippy --all-targets --all-features -- -D warnings
 
-      - name: Cargo test
-        run: cargo test --all-targets --all-features
+      - name: Cargo test (default — no network)
+        run: cargo test --all-targets
+
+      - name: Cargo test (verify feature)
+        run: cargo test --all-targets --features verify
 
       - name: Cargo doc
-        run: cargo doc --no-deps
+        run: cargo doc --no-deps --all-features
