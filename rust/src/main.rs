@@ -1,9 +1,13 @@
 use colored::Colorize;
 use std::io::Read;
-use truthlens::{analyze, check_consistency};
+use truthlens::{analyze, analyze_with_verification, check_consistency};
 
-fn print_report(text: &str, json_mode: bool) {
-    let report = analyze(text);
+fn print_report(text: &str, json_mode: bool, verify: bool) {
+    let report = if verify {
+        analyze_with_verification(text)
+    } else {
+        analyze(text)
+    };
 
     if json_mode {
         println!("{}", serde_json::to_string_pretty(&report).unwrap());
@@ -91,6 +95,32 @@ fn print_report(text: &str, json_mode: bool) {
             text.white()
         );
         println!("     {}", claim.trust.explanation.dimmed());
+
+        // Display verification results if present
+        if let Some(ref vr) = claim.verification {
+            for m in &vr.matches {
+                if let Some(ref qid) = m.wikidata_id {
+                    let props = if m.verified_properties.is_empty() {
+                        "exists".to_string()
+                    } else {
+                        m.verified_properties.join(", ")
+                    };
+                    println!(
+                        "     {} Verified: {} ({}) — {} \u{2713}",
+                        "\u{1f50d}".green(),
+                        m.entity_name.green(),
+                        qid.dimmed(),
+                        props.green()
+                    );
+                } else {
+                    println!(
+                        "     {} Not verified: {} — no match found",
+                        "\u{274c}".red(),
+                        m.entity_name.red()
+                    );
+                }
+            }
+        }
     }
     println!();
 }
@@ -184,6 +214,11 @@ fn print_usage() {
     );
     eprintln!();
     eprintln!(
+        "  {} --verify \"text\"                      Verify entities via Wikidata",
+        "truthlens".green()
+    );
+    eprintln!();
+    eprintln!(
         "  {} --consistency \"resp1\" \"resp2\" ...     Compare responses",
         "truthlens".green()
     );
@@ -203,6 +238,7 @@ fn print_usage() {
     eprintln!();
     eprintln!("{}", "Examples:".underline());
     eprintln!("  truthlens \"Einstein was born in 1879 in Ulm.\"",);
+    eprintln!("  truthlens --verify \"Einstein was born in 1879 in Ulm.\"",);
     eprintln!("  truthlens --consistency \\",);
     eprintln!("    \"Einstein was born in 1879 in Ulm.\" \\",);
     eprintln!("    \"Einstein was born in 1879 in Munich.\"",);
@@ -245,7 +281,7 @@ fn run_demo() {
 
     for (title, text) in examples {
         println!("\n─── {} ───", title.bold());
-        print_report(text, false);
+        print_report(text, false, false);
     }
 
     println!("\n─── {} ───", "Consistency check".bold());
@@ -273,18 +309,20 @@ fn main() {
             eprintln!("{}", "Error: empty input".red());
             std::process::exit(1);
         }
-        print_report(input.trim(), false);
+        print_report(input.trim(), false, false);
         return;
     }
 
     let mut json_mode = false;
     let mut consistency_mode = false;
+    let mut verify_mode = false;
     let mut text_args: Vec<String> = Vec::new();
 
     for arg in args.iter().skip(1) {
         match arg.as_str() {
             "--json" | "-j" => json_mode = true,
             "--consistency" | "-c" => consistency_mode = true,
+            "--verify" | "-v" => verify_mode = true,
             "--help" | "-h" => {
                 print_usage();
                 return;
@@ -295,6 +333,19 @@ fn main() {
             }
             _ => text_args.push(arg.clone()),
         }
+    }
+
+    // Check if verify was requested but feature not compiled
+    if verify_mode && !cfg!(feature = "verify") {
+        eprintln!(
+            "{}",
+            "Error: --verify requires the 'verify' feature. Reinstall with:".red()
+        );
+        eprintln!(
+            "  {}",
+            "cargo install truthlens --features verify".yellow()
+        );
+        std::process::exit(1);
     }
 
     if text_args.is_empty() {
@@ -315,7 +366,7 @@ fn main() {
                         std::process::exit(1);
                     }
                 } else {
-                    print_report(trimmed, json_mode);
+                    print_report(trimmed, json_mode, verify_mode);
                 }
                 return;
             }
@@ -329,6 +380,6 @@ fn main() {
         print_consistency(&refs, json_mode);
     } else {
         let text = text_args.join(" ");
-        print_report(&text, json_mode);
+        print_report(&text, json_mode, verify_mode);
     }
 }
