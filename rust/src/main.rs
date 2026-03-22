@@ -341,10 +341,7 @@ fn main() {
             "{}",
             "Error: --verify requires the 'verify' feature. Reinstall with:".red()
         );
-        eprintln!(
-            "  {}",
-            "cargo install truthlens --features verify".yellow()
-        );
+        eprintln!("  {}", "cargo install truthlens --features verify".yellow());
         std::process::exit(1);
     }
 

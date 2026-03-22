@@ -115,13 +115,55 @@ pub fn extract_entities_from_claim(claim: &str) -> Vec<String> {
 fn is_skip_word(word: &str) -> bool {
     matches!(
         word,
-        "The" | "This" | "That" | "These" | "Those" | "It" | "They"
-        | "He" | "She" | "We" | "However" | "Although" | "Moreover"
-        | "Furthermore" | "Additionally" | "In" | "On" | "At" | "For"
-        | "With" | "But" | "And" | "Or" | "As" | "If" | "Was" | "Were"
-        | "Is" | "Are" | "Has" | "Had" | "Have" | "His" | "Her" | "Its"
-        | "Their" | "Some" | "Many" | "Several" | "Each" | "Every"
-        | "No" | "Not" | "By" | "From" | "To" | "Of" | "A" | "An"
+        "The"
+            | "This"
+            | "That"
+            | "These"
+            | "Those"
+            | "It"
+            | "They"
+            | "He"
+            | "She"
+            | "We"
+            | "However"
+            | "Although"
+            | "Moreover"
+            | "Furthermore"
+            | "Additionally"
+            | "In"
+            | "On"
+            | "At"
+            | "For"
+            | "With"
+            | "But"
+            | "And"
+            | "Or"
+            | "As"
+            | "If"
+            | "Was"
+            | "Were"
+            | "Is"
+            | "Are"
+            | "Has"
+            | "Had"
+            | "Have"
+            | "His"
+            | "Her"
+            | "Its"
+            | "Their"
+            | "Some"
+            | "Many"
+            | "Several"
+            | "Each"
+            | "Every"
+            | "No"
+            | "Not"
+            | "By"
+            | "From"
+            | "To"
+            | "Of"
+            | "A"
+            | "An"
     )
 }
 
@@ -330,7 +372,9 @@ pub fn verify_claim(claim_text: &str) -> VerificationResult {
 
     let matches = verify_entities(&entities);
 
-    let has_verified = matches.iter().any(|m| m.wikidata_id.is_some() && m.confidence > 0.5);
+    let has_verified = matches
+        .iter()
+        .any(|m| m.wikidata_id.is_some() && m.confidence > 0.5);
     let status = if has_verified {
         VerificationStatus::Verified
     } else {
@@ -361,9 +405,8 @@ mod tests {
 
     #[test]
     fn extract_person_name() {
-        let entities = extract_entities_from_claim(
-            "Albert Einstein was born in 1879 in Ulm, Germany.",
-        );
+        let entities =
+            extract_entities_from_claim("Albert Einstein was born in 1879 in Ulm, Germany.");
         assert!(
             entities.contains(&"Albert Einstein".to_string()),
             "Should extract 'Albert Einstein', got: {:?}",
@@ -378,9 +421,8 @@ mod tests {
 
     #[test]
     fn extract_multiple_names() {
-        let entities = extract_entities_from_claim(
-            "Marie Curie and Pierre Curie discovered radium in Paris.",
-        );
+        let entities =
+            extract_entities_from_claim("Marie Curie and Pierre Curie discovered radium in Paris.");
         assert!(
             entities.contains(&"Marie Curie".to_string()),
             "Should extract 'Marie Curie', got: {:?}",
@@ -395,21 +437,25 @@ mod tests {
 
     #[test]
     fn extract_years() {
-        let entities = extract_entities_from_claim(
-            "The theory was published in 1905 and revised in 1915.",
-        );
+        let entities =
+            extract_entities_from_claim("The theory was published in 1905 and revised in 1915.");
         assert!(entities.contains(&"1905".to_string()));
         assert!(entities.contains(&"1915".to_string()));
     }
 
     #[test]
     fn extract_no_entities_from_vague_text() {
-        let entities = extract_entities_from_claim(
-            "Some researchers have found various interesting results.",
-        );
+        let entities =
+            extract_entities_from_claim("Some researchers have found various interesting results.");
         // Should have no multi-word names or years
-        let has_year = entities.iter().any(|e| e.len() == 4 && e.chars().all(|c| c.is_ascii_digit()));
-        assert!(!has_year, "Should not extract years from vague text, got: {:?}", entities);
+        let has_year = entities
+            .iter()
+            .any(|e| e.len() == 4 && e.chars().all(|c| c.is_ascii_digit()));
+        assert!(
+            !has_year,
+            "Should not extract years from vague text, got: {:?}",
+            entities
+        );
     }
 
     #[test]
@@ -436,13 +482,11 @@ mod tests {
 
     #[test]
     fn verification_modifier_all_contradicted() {
-        let results = vec![
-            VerificationResult {
-                claim_text: "test".to_string(),
-                matches: vec![],
-                status: VerificationStatus::Contradicted,
-            },
-        ];
+        let results = vec![VerificationResult {
+            claim_text: "test".to_string(),
+            matches: vec![],
+            status: VerificationStatus::Contradicted,
+        }];
         let modifier = compute_verification_modifier(&results);
         assert!(
             (modifier - (-0.15)).abs() < 0.001,
@@ -485,13 +529,11 @@ mod tests {
 
     #[test]
     fn verification_modifier_all_unknown() {
-        let results = vec![
-            VerificationResult {
-                claim_text: "test".to_string(),
-                matches: vec![],
-                status: VerificationStatus::Unknown,
-            },
-        ];
+        let results = vec![VerificationResult {
+            claim_text: "test".to_string(),
+            matches: vec![],
+            status: VerificationStatus::Unknown,
+        }];
         let modifier = compute_verification_modifier(&results);
         assert!(
             modifier.abs() < 0.001,
@@ -531,7 +573,10 @@ mod tests {
     #[test]
     fn verification_status_display() {
         assert_eq!(format!("{}", VerificationStatus::Verified), "VERIFIED");
-        assert_eq!(format!("{}", VerificationStatus::Contradicted), "CONTRADICTED");
+        assert_eq!(
+            format!("{}", VerificationStatus::Contradicted),
+            "CONTRADICTED"
+        );
         assert_eq!(format!("{}", VerificationStatus::Unknown), "UNKNOWN");
     }
 
@@ -542,7 +587,10 @@ mod tests {
     fn integration_verify_einstein() {
         let entities = vec!["Albert Einstein".to_string()];
         let matches = verify_entities(&entities);
-        assert!(!matches.is_empty(), "Should find Albert Einstein on Wikidata");
+        assert!(
+            !matches.is_empty(),
+            "Should find Albert Einstein on Wikidata"
+        );
         let einstein = &matches[0];
         assert!(
             einstein.wikidata_id.is_some(),
