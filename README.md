@@ -150,8 +150,28 @@ print(entities)  # ['1903', 'Marie Curie']
 ### Install via Snap (v0.5)
 
 ```bash
+# Install from Snap Store (Ubuntu/Linux)
 sudo snap install truthlens
+
+# Analyze text
 truthlens "Einstein invented the telephone in 1876."
+
+# JSON output
+truthlens --json "Python was created in 1991."
+
+# Compare multiple AI responses
+truthlens --consistency \
+  "Einstein was born in Ulm." \
+  "Einstein was born in Munich."
+
+# Entity verification (requires network)
+truthlens --verify "Marie Curie won the Nobel Prize in 1903."
+
+# Run demo examples
+truthlens --demo
+
+# Show help
+truthlens --help
 ```
 
 ### Entity verification (v0.4)
