@@ -1,0 +1,26 @@
+name: Python CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['python/**', '.github/workflows/python-ci.yml']
+  pull_request:
+    paths: ['python/**', '.github/workflows/python-ci.yml']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install maturin and test deps
+        run: pip install maturin pytest
+      - name: Build and install
+        working-directory: python
+        run: maturin develop --features pyo3/extension-module
+      - name: Run tests
+        working-directory: python
+        run: pytest tests/ -v
