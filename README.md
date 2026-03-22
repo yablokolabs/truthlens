@@ -115,10 +115,33 @@ echo '["Python was created in 1991.", "Python was created in 1989."]' \
   | truthlens --consistency
 ```
 
+### Entity verification (v0.4)
+
+Cross-reference named entities (people, places, dates) against Wikidata to boost or reduce trust scores.
+
+```bash
+# Install with verification support
+cargo install truthlens --features verify
+
+# Verify entities in a claim
+truthlens --verify "Albert Einstein was born in 1879 in Ulm, Germany."
+#  Trust: 67% [████████████████████░░░░░░░░░░] MEDIUM
+#  🔍 Verified: Albert Einstein (Q937) — birth year: 1879, birthplace: Ulm ✓
+
+# Combine with JSON output
+truthlens --verify --json "Marie Curie won the Nobel Prize in 1903."
+```
+
+> **Note:** The `--verify` flag requires the `verify` feature (adds the `ureq` HTTP dependency).
+> Without `--features verify`, TruthLens works fully offline with no network dependencies.
+
 ```toml
 # Cargo.toml
 [dependencies]
-truthlens = "0.3"
+truthlens = "0.4"
+
+# With entity verification
+# truthlens = { version = "0.4", features = ["verify"] }
 ```
 
 ## What It Does
@@ -201,6 +224,19 @@ Passage score = 70% average + 30% worst claim. One bad claim drags down the whol
 - `contradiction_symmetric` — if A contradicts B, B contradicts A
 - `unique_bounded` — unique claims ≤ total claims
 
+### Verification (v0.4)
+- `verification_modifier_bounded` — modifier ∈ [0, 15] (scaled) after clamp
+- `combined_modifier_bounded` — combined modifier ∈ [-15, +15]
+- `adjusted_score_with_verification` — score + verification modifier stays in [0, 100]
+- `adjusted_score_with_both` — score + trajectory + verification modifier stays in [0, 100]
+- `entity_partition` — verified + contradicted + unknown = total
+- `verified_contradicted_disjoint` — verified + contradicted ≤ total
+- `empty_verification_neutral` — no entities → zero modifier
+- `all_verified_max` — all verified → maximum positive modifier
+- `all_contradicted_max` — all contradicted → maximum negative modifier
+- `more_verified_improves` — adding verified entity increases modifier (monotonic)
+- `more_contradicted_worsens` — adding contradicted entity decreases modifier (monotonic)
+
 ## Examples
 
 ### Factual text
@@ -272,7 +308,10 @@ truthlens/
 │   │   ├── scorer.rs           # Trust scoring + signal aggregation
 │   │   ├── trajectory.rs       # Confidence trajectory analysis (v0.2)
 │   │   ├── consistency.rs      # Multi-response consistency checker (v0.3)
-│   │   └── main.rs             # CLI: analyze, --consistency, --demo
+│   │   ├── entity.rs           # Entity cross-reference with Wikidata (v0.4)
+│   │   └── main.rs             # CLI: analyze, --consistency, --verify, --demo
+│   ├── tests/
+│   │   └── integration.rs      # End-to-end integration tests
 │   └── Cargo.toml
 ├── lean/                       # Formal proofs
 │   ├── TruthLens/
@@ -280,7 +319,8 @@ truthlens/
 │   │   ├── Monotonicity.lean   # Better signals → better score
 │   │   ├── Composition.lean    # Passage aggregation properties
 │   │   ├── Trajectory.lean     # Trajectory modifier bounds + correctness
-│   │   └── Consistency.lean    # Contradiction bounds, agreement, symmetry
+│   │   ├── Consistency.lean    # Contradiction bounds, agreement, symmetry
+│   │   └── Verification.lean   # Entity verification modifier bounds (v0.4)
 │   └── lakefile.lean
 ├── bridge/                     # Lean ↔ Rust mapping (coming)
 └── README.md
@@ -289,13 +329,14 @@ truthlens/
 ## Build
 
 ```bash
-# Rust
+# Rust (default — no network dependencies)
 cd rust
-cargo test       # 22 tests (21 unit + 1 doc)
+cargo test                    # unit + doc tests
+cargo test --features verify  # includes entity verification tests
 
 # Lean
 cd lean
-lake build        # 5 proof modules, zero sorry
+lake build        # 6 proof modules, zero sorry
 cargo run         # demo with examples
 
 # Lean
@@ -308,7 +349,7 @@ lake build        # compile all proofs
 - [x] **v0.1** — Linguistic analysis: claim extraction, hedging detection, specificity scoring
 - [x] **v0.2** — Confidence trajectory: detects oscillating, flat, or convergent confidence patterns using second-order dynamical system modeling
 - [x] **v0.3** — Multi-response consistency, CLI (`cargo install truthlens`), colored output
-- [ ] **v0.4** — Entity cross-reference: verify extracted entities, dates, and numbers against knowledge bases (optional network, offline cache)
+- [x] **v0.4** — Entity cross-reference: verify extracted entities against Wikidata SPARQL (optional `verify` feature flag)
 - [ ] **v0.5** — Python bindings (PyO3) → `pip install truthlens`
 - [ ] **v0.6** — Claude Code / MCP integration: local stdio MCP server, `analyze_text` + `analyze_file` tools, auto-checks AI text claims in-context
 - [ ] **v0.7** — VS Code extension: analyze selection/file, inline diagnostics for docs/comments/markdown, status bar trust score
