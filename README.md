@@ -360,9 +360,15 @@ Passage score = 70% average + 30% worst claim. One bad claim drags down the whol
 
 ```
 truthlens/
+├── .github/                    # Automation and release workflows
+│   └── workflows/
+│       ├── pypi-publish.yml
+│       ├── python-ci.yml
+│       ├── release.yml
+│       └── rust-ci.yml
 ├── rust/                       # Core library + CLI
 │   ├── src/
-│   │   ├── lib.rs              # Public API: analyze(), check_consistency()
+│   │   ├── lib.rs              # Public API: analyze(), check_consistency(), extract_*()
 │   │   ├── claim.rs            # Claim extraction + linguistic analysis
 │   │   ├── scorer.rs           # Trust scoring + signal aggregation
 │   │   ├── trajectory.rs       # Confidence trajectory analysis (v0.2)
@@ -392,8 +398,10 @@ truthlens/
 │   │   └── Verification.lean   # Entity verification modifier bounds (v0.4)
 │   └── lakefile.lean
 ├── snap/                       # Snap package config (v0.5)
+│   ├── gui/
+│   │   └── truthlens.png       # Snap store icon
 │   └── snapcraft.yaml
-├── bridge/                     # Lean ↔ Rust mapping (coming)
+├── bridge/                     # Lean ↔ Rust mapping (experimental / placeholder)
 └── README.md
 ```
 
