@@ -115,6 +115,65 @@ echo '["Python was created in 1991.", "Python was created in 1989."]' \
   | truthlens --consistency
 ```
 
+### Use as a Python library (v0.5)
+
+```bash
+pip install truthlens
+```
+
+```python
+from truthlens import analyze, check_consistency, extract_claims, extract_entities
+
+# Analyze text for hallucination risk
+report = analyze("Einstein was born in 1879 in Ulm, Germany.")
+print(f"Trust: {report['score']:.0%} — {report['risk_level']}")
+
+# Per-claim breakdown
+for claim in report["claims"]:
+    print(f"  {claim['text']} — {claim['trust']['risk_level']}")
+
+# Multi-response consistency check
+result = check_consistency([
+    "Einstein was born in 1879 in Ulm.",
+    "Einstein was born in 1879 in Munich.",
+])
+print(f"Consistency: {result['consistency_score']:.0%}")
+
+# Extract atomic claims
+claims = extract_claims("Python was created in 1991. It is widely used.")
+
+# Extract named entities
+entities = extract_entities("Marie Curie won the Nobel Prize in 1903.")
+print(entities)  # ['1903', 'Marie Curie']
+```
+
+### Install via Snap (v0.5)
+
+```bash
+# Install from Snap Store (Ubuntu/Linux)
+sudo snap install truthlens
+
+# Analyze text
+truthlens "Einstein invented the telephone in 1876."
+
+# JSON output
+truthlens --json "Python was created in 1991."
+
+# Compare multiple AI responses
+truthlens --consistency \
+  "Einstein was born in Ulm." \
+  "Einstein was born in Munich."
+
+# Entity verification (requires network)
+truthlens --verify "Marie Curie won the Nobel Prize in 1903."
+
+# Run demo examples
+truthlens --demo
+
+# Show help
+truthlens --help
+```
+
 ### Entity verification (v0.4)
 
 Cross-reference named entities (people, places, dates) against Wikidata to boost or reduce trust scores.
@@ -138,10 +197,10 @@ truthlens --verify --json "Marie Curie won the Nobel Prize in 1903."
 ```toml
 # Cargo.toml
 [dependencies]
-truthlens = "0.4"
+truthlens = "0.5"
 
 # With entity verification
-# truthlens = { version = "0.4", features = ["verify"] }
+# truthlens = { version = "0.5", features = ["verify"] }
 ```
 
 ## What It Does
@@ -313,6 +372,16 @@ truthlens/
 │   ├── tests/
 │   │   └── integration.rs      # End-to-end integration tests
 │   └── Cargo.toml
+├── python/                     # Python bindings (v0.5)
+│   ├── src/lib.rs              # PyO3 wrapper
+│   ├── truthlens/              # Python package
+│   │   ├── __init__.py         # Re-exports + docstrings
+│   │   ├── __init__.pyi        # Type stubs (PEP 561)
+│   │   └── py.typed            # PEP 561 marker
+│   ├── tests/
+│   │   └── test_truthlens.py   # Python test suite
+│   ├── Cargo.toml              # cdylib crate
+│   └── pyproject.toml          # maturin build config
 ├── lean/                       # Formal proofs
 │   ├── TruthLens/
 │   │   ├── ScoreBounds.lean    # Score ∈ [0, 1], weight sum, clamp
@@ -322,6 +391,8 @@ truthlens/
 │   │   ├── Consistency.lean    # Contradiction bounds, agreement, symmetry
 │   │   └── Verification.lean   # Entity verification modifier bounds (v0.4)
 │   └── lakefile.lean
+├── snap/                       # Snap package config (v0.5)
+│   └── snapcraft.yaml
 ├── bridge/                     # Lean ↔ Rust mapping (coming)
 └── README.md
 ```
@@ -334,14 +405,15 @@ cd rust
 cargo test                    # unit + doc tests
 cargo test --features verify  # includes entity verification tests
 
-# Lean
-cd lean
-lake build        # 6 proof modules, zero sorry
-cargo run         # demo with examples
+# Python bindings
+cd python
+pip install maturin pytest
+maturin develop               # build + install locally
+pytest tests/ -v               # run Python tests
 
 # Lean
 cd lean
-lake build        # compile all proofs
+lake build        # 6 proof modules, zero sorry
 ```
 
 ## Roadmap
@@ -350,7 +422,7 @@ lake build        # compile all proofs
 - [x] **v0.2** — Confidence trajectory: detects oscillating, flat, or convergent confidence patterns using second-order dynamical system modeling
 - [x] **v0.3** — Multi-response consistency, CLI (`cargo install truthlens`), colored output
 - [x] **v0.4** — Entity cross-reference: verify extracted entities against Wikidata SPARQL (optional `verify` feature flag)
-- [ ] **v0.5** — Python bindings (PyO3) → `pip install truthlens`
+- [x] **v0.5** — Python bindings (PyO3) → `pip install truthlens`, Snap package
 - [ ] **v0.6** — Claude Code / MCP integration: local stdio MCP server, `analyze_text` + `analyze_file` tools, auto-checks AI text claims in-context
 - [ ] **v0.7** — VS Code extension: analyze selection/file, inline diagnostics for docs/comments/markdown, status bar trust score
 - [ ] **v0.8** — CI/CD integration: GitHub Action, fail builds on low trust score, policy thresholds (`--min-score`)

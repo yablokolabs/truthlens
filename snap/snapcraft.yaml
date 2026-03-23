@@ -1,0 +1,23 @@
+name: truthlens
+base: core22
+version: '0.5.0'
+summary: AI Hallucination Detector — trust scoring for LLM outputs
+description: |
+  Analyze AI-generated text for hallucination risk. No API keys needed.
+  No LLM calls required. Fast, local, formally verified.
+grade: stable
+confinement: strict
+
+apps:
+  truthlens:
+    command: bin/truthlens
+    plugs:
+      - network
+
+parts:
+  truthlens:
+    plugin: rust
+    source: .
+    rust-path: [rust]
+    build-attributes:
+      - enable-patchelf

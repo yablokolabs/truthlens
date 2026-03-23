@@ -1,4 +1,10 @@
 rust/target/
+python/target/
+python/.venv/
+python/.pytest_cache/
+python/truthlens/__pycache__/
+python/tests/__pycache__/
+python/truthlens/_truthlens.cpython-*.so
 lean/.lake/
 *.olean
 *.ilean
