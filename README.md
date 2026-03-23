@@ -401,7 +401,7 @@ truthlens/
 │   ├── gui/
 │   │   └── truthlens.png       # Snap store icon
 │   └── snapcraft.yaml
-├── bridge/                     # Lean ↔ Rust mapping (experimental / placeholder)
+├── bridge/                     # Lean ↔ Rust proof/runtime mapping
 └── README.md
 ```
 
