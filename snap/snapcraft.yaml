@@ -1,10 +1,26 @@
 name: truthlens
 base: core22
 version: '0.5.0'
-summary: AI Hallucination Detector — trust scoring for LLM outputs
+summary: Formally verified trust scoring for AI-generated text
 description: |
-  Analyze AI-generated text for hallucination risk. No API keys needed.
-  No LLM calls required. Fast, local, formally verified.
+  TruthLens analyzes AI-generated text for hallucination risk using fast local
+  trust scoring with a formally verified core.
+
+  No API keys. No LLM calls. No cloud dependency.
+
+  Features:
+    - trust scoring for generated text
+    - claim extraction
+    - consistency checks
+    - entity extraction
+    - local-first CLI workflow
+
+  Built for developers, researchers, and teams evaluating LLM output quality.
+license: Apache-2.0
+website: https://github.com/yablokolabs/truthlens
+source-code: https://github.com/yablokolabs/truthlens
+issues: https://github.com/yablokolabs/truthlens/issues
+icon: snap/gui/truthlens.png
 grade: stable
 confinement: strict
 
