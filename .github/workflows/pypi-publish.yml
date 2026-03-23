@@ -21,18 +21,13 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: |
-            3.9
-            3.10
-            3.11
-            3.12
-            3.13
+          python-version: '3.13'
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           working-directory: python
-          args: --release --out dist --find-interpreter
+          args: --release --out dist -i python3.9 python3.10 python3.11 python3.12 python3.13
           sccache: 'true'
           manylinux: auto
 
