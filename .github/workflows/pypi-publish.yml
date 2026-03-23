@@ -14,8 +14,17 @@ jobs:
     name: Build wheels — ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13, macos-14, windows-latest]
+        include:
+          - os: ubuntu-latest
+            args: --release --out dist -i python3.11 python3.12 python3.13
+          - os: macos-13
+            args: --release --out dist
+          - os: macos-14
+            args: --release --out dist
+          - os: windows-latest
+            args: --release --out dist
     steps:
       - uses: actions/checkout@v4
 
@@ -27,7 +36,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           working-directory: python
-          args: --release --out dist -i python3.9 python3.10 python3.11 python3.12 python3.13
+          args: ${{ matrix.args }}
           sccache: 'true'
           manylinux: auto
 
