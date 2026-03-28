@@ -10,6 +10,23 @@ Analyze AI-generated text for hallucination risk. No API keys needed. No LLM cal
 **Published package:** <https://crates.io/crates/truthlens>
 **API docs:** <https://docs.rs/truthlens>
 
+## MCP Integration (v0.6)
+
+TruthLens includes a local stdio MCP server for editor/agent integrations.
+
+Available tools:
+- `analyze_text` — analyze raw text in-context
+- `analyze_file` — analyze a local UTF-8 text file
+
+Run locally:
+
+```bash
+cd rust
+cargo run --bin mcp_server
+```
+
+This enables local claim checking for AI-generated text without API keys or cloud calls.
+
 ## Quick Start
 
 ### Install as CLI
@@ -374,7 +391,10 @@ truthlens/
 │   │   ├── trajectory.rs       # Confidence trajectory analysis (v0.2)
 │   │   ├── consistency.rs      # Multi-response consistency checker (v0.3)
 │   │   ├── entity.rs           # Entity cross-reference with Wikidata (v0.4)
+│   │   ├── mcp.rs              # MCP request handling, tool dispatch, and tests (v0.6)
 │   │   └── main.rs             # CLI: analyze, --consistency, --verify, --demo
+│   ├── bin/
+│   │   └── mcp_server.rs       # Local stdio MCP server (v0.6)
 │   ├── tests/
 │   │   └── integration.rs      # End-to-end integration tests
 │   └── Cargo.toml
@@ -431,7 +451,7 @@ lake build        # 6 proof modules, zero sorry
 - [x] **v0.3** — Multi-response consistency, CLI (`cargo install truthlens`), colored output
 - [x] **v0.4** — Entity cross-reference: verify extracted entities against Wikidata SPARQL (optional `verify` feature flag)
 - [x] **v0.5** — Python bindings (PyO3) → `pip install truthlens`, Snap package
-- [ ] **v0.6** — Claude Code / MCP integration: local stdio MCP server, `analyze_text` + `analyze_file` tools, auto-checks AI text claims in-context
+- [x] **v0.6** — Claude Code / MCP integration: local stdio MCP server, `analyze_text` + `analyze_file` tools, auto-checks AI text claims in-context
 - [ ] **v0.7** — VS Code extension: analyze selection/file, inline diagnostics for docs/comments/markdown, status bar trust score
 - [ ] **v0.8** — CI/CD integration: GitHub Action, fail builds on low trust score, policy thresholds (`--min-score`)
 - [ ] **v0.9** — Browser extension: highlight claims in ChatGPT/Claude UI with inline trust indicators
