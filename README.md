@@ -132,7 +132,7 @@ echo '["Python was created in 1991.", "Python was created in 1989."]' \
   | truthlens --consistency
 ```
 
-### Use as a Python library (v0.5)
+### Use as a Python library (v0.6)
 
 ```bash
 pip install truthlens
@@ -164,7 +164,7 @@ entities = extract_entities("Marie Curie won the Nobel Prize in 1903.")
 print(entities)  # ['1903', 'Marie Curie']
 ```
 
-### Install via Snap (v0.5)
+### Install via Snap (v0.6)
 
 ```bash
 # Install from Snap Store (Ubuntu/Linux)
@@ -214,7 +214,7 @@ truthlens --verify --json "Marie Curie won the Nobel Prize in 1903."
 ```toml
 # Cargo.toml
 [dependencies]
-truthlens = "0.5"
+truthlens = "0.6"
 
 # With entity verification
 # truthlens = { version = "0.5", features = ["verify"] }
@@ -398,7 +398,7 @@ truthlens/
 │   ├── tests/
 │   │   └── integration.rs      # End-to-end integration tests
 │   └── Cargo.toml
-├── python/                     # Python bindings (v0.5)
+├── python/                     # Python bindings (v0.6)
 │   ├── src/lib.rs              # PyO3 wrapper
 │   ├── truthlens/              # Python package
 │   │   ├── __init__.py         # Re-exports + docstrings
@@ -417,7 +417,7 @@ truthlens/
 │   │   ├── Consistency.lean    # Contradiction bounds, agreement, symmetry
 │   │   └── Verification.lean   # Entity verification modifier bounds (v0.4)
 │   └── lakefile.lean
-├── snap/                       # Snap package config (v0.5)
+├── snap/                       # Snap package config (v0.6)
 │   ├── gui/
 │   │   └── truthlens.png       # Snap store icon
 │   └── snapcraft.yaml

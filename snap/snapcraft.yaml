@@ -1,6 +1,6 @@
 name: truthlens
 base: core22
-version: '0.5.0'
+version: '0.6.0'
 summary: Formally verified trust scoring for AI-generated text
 description: |
   TruthLens analyzes AI-generated text for hallucination risk using fast local

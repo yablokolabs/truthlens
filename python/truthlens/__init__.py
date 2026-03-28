@@ -14,7 +14,7 @@ from truthlens._truthlens import (
     extract_entities,
 )
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 __all__ = [
     "analyze",
