@@ -208,3 +208,62 @@ fn main() {
         stdout.flush().unwrap();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+    use std::fs;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn tools_list_contains_expected_tools() {
+        let tools = tool_definitions();
+        let arr = tools.as_array().expect("tools should be an array");
+        let names: Vec<&str> = arr
+            .iter()
+            .filter_map(|t| t.get("name").and_then(Value::as_str))
+            .collect();
+        assert!(names.contains(&"analyze_text"));
+        assert!(names.contains(&"analyze_file"));
+    }
+
+    #[test]
+    fn analyze_text_returns_structured_content() {
+        let result = handle_call_tool(
+            "analyze_text",
+            Some(&json!({"text": "Einstein was born in 1879 in Ulm."})),
+        )
+        .expect("analyze_text should succeed");
+        assert!(result.get("structuredContent").is_some());
+        let content = result
+            .get("content")
+            .and_then(Value::as_array)
+            .expect("content array expected");
+        assert!(!content.is_empty());
+    }
+
+    #[test]
+    fn analyze_file_rejects_missing_file() {
+        let result = handle_call_tool(
+            "analyze_file",
+            Some(&json!({"path": "/definitely/not/a/real/file.txt"})),
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn analyze_file_reads_text_file() {
+        let tmp_name = format!(
+            "/tmp/truthlens-mcp-test-{}.txt",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        );
+        fs::write(&tmp_name, "This claim might be true.").unwrap();
+        let result = handle_call_tool("analyze_file", Some(&json!({"path": tmp_name})))
+            .expect("analyze_file should succeed for text file");
+        assert!(result.get("structuredContent").is_some());
+    }
+}
