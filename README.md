@@ -10,6 +10,23 @@ Analyze AI-generated text for hallucination risk. No API keys needed. No LLM cal
 **Published package:** <https://crates.io/crates/truthlens>
 **API docs:** <https://docs.rs/truthlens>
 
+## MCP Integration (v0.6)
+
+TruthLens includes a local stdio MCP server for editor/agent integrations.
+
+Available tools:
+- `analyze_text` — analyze raw text in-context
+- `analyze_file` — analyze a local UTF-8 text file
+
+Run locally:
+
+```bash
+cd rust
+cargo run --bin mcp_server
+```
+
+This enables local claim checking for AI-generated text without API keys or cloud calls.
+
 ## Quick Start
 
 ### Install as CLI
