@@ -16,6 +16,7 @@
 pub mod claim;
 pub mod consistency;
 pub mod entity;
+pub mod mcp;
 pub mod scorer;
 pub mod trajectory;
 
