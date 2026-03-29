@@ -1,3 +1,4 @@
+#![allow(unsafe_op_in_unsafe_fn)]
 #![allow(clippy::useless_conversion)]
 
 use pyo3::prelude::*;

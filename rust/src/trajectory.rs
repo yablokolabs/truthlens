@@ -187,10 +187,10 @@ fn count_transitions(scores: &[f64]) -> usize {
             continue; // No significant change
         }
         let increasing = diff > 0.0;
-        if let Some(prev) = prev_direction {
-            if prev != increasing {
-                transitions += 1;
-            }
+        if let Some(prev) = prev_direction
+            && prev != increasing
+        {
+            transitions += 1;
         }
         prev_direction = Some(increasing);
     }
@@ -212,11 +212,7 @@ fn compute_trend(scores: &[f64]) -> f64 {
         den += x * x;
     }
 
-    if den.abs() < 1e-10 {
-        0.0
-    } else {
-        num / den
-    }
+    if den.abs() < 1e-10 { 0.0 } else { num / den }
 }
 
 fn classify_pattern(
