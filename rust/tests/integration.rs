@@ -2,7 +2,7 @@
 //!
 //! These tests verify the public API works end-to-end.
 
-use truthlens::{analyze, analyze_with_verification, check_consistency, RiskLevel};
+use truthlens::{RiskLevel, analyze, analyze_with_verification, check_consistency};
 
 #[test]
 fn analyze_factual_text() {
