@@ -324,10 +324,10 @@ fn query_wikidata_entity(entity: &str) -> Result<Option<EntityMatch>, String> {
     if let Some(year) = first["birthYear"]["value"].as_str() {
         properties.push(format!("birth year: {}", year));
     }
-    if let Some(place) = first["birthPlaceLabel"]["value"].as_str() {
-        if place != entity {
-            properties.push(format!("birthplace: {}", place));
-        }
+    if let Some(place) = first["birthPlaceLabel"]["value"].as_str()
+        && place != entity
+    {
+        properties.push(format!("birthplace: {}", place));
     }
 
     let confidence = if !properties.is_empty() { 0.8 } else { 0.6 };

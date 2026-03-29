@@ -20,10 +20,10 @@ pub mod mcp;
 pub mod scorer;
 pub mod trajectory;
 
-pub use claim::{extract_claims, Claim};
-pub use consistency::{check_consistency, ConsistencyReport, Contradiction};
-pub use scorer::{score_claim, score_passage, RiskLevel, TrustScore};
-pub use trajectory::{analyze_trajectory, TrajectoryAnalysis, TrajectoryPattern};
+pub use claim::{Claim, extract_claims};
+pub use consistency::{ConsistencyReport, Contradiction, check_consistency};
+pub use scorer::{RiskLevel, TrustScore, score_claim, score_passage};
+pub use trajectory::{TrajectoryAnalysis, TrajectoryPattern, analyze_trajectory};
 
 use serde::{Deserialize, Serialize};
 

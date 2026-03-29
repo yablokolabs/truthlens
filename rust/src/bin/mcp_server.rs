@@ -1,5 +1,5 @@
 use std::io::{self, BufRead, Write};
-use truthlens::mcp::{failure, handle_request, JsonRpcRequest};
+use truthlens::mcp::{JsonRpcRequest, failure, handle_request};
 
 fn main() {
     let stdin = io::stdin();
